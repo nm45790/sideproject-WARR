@@ -1,1 +1,124 @@
 @import "tailwindcss";
+
+/* Pretendard Variable 폰트 설정 */
+@font-face {
+  font-family: "Pretendard Variable";
+  font-weight: 45 920;
+  font-style: normal;
+  font-display: swap;
+  src:
+    local("Pretendard Variable"),
+    url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/woff2/PretendardVariable.woff2")
+      format("woff2-variations");
+}
+
+/* 기본 타이포그래피 및 색상 */
+html {
+  font-family:
+    "Pretendard Variable",
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    "Noto Sans",
+    "Apple SD Gothic Neo",
+    "Malgun Gothic",
+    "Apple Color Emoji",
+    "Segoe UI Emoji",
+    "Segoe UI Symbol",
+    sans-serif;
+}
+
+/* Tailwind v4 @theme: 기본 산세리프 폰트를 Pretendard로 설정 및 색상 토큰 매핑 */
+/* stylelint-disable at-rule-no-unknown */
+@theme {
+  /* 폰트 */
+  --font-sans:
+    "Pretendard Variable", ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+    Roboto, "Noto Sans", "Apple SD Gothic Neo", "Malgun Gothic",
+    "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif;
+
+  /* colors from app/utils/theme.ts */
+  --color-primary-100: #fdf5ad;
+  --color-primary-200: #ffedb9;
+  --color-primary-300: #ffe762;
+  --color-primary-400: #ffd45d;
+  --color-primary-500: #f7c948;
+  --color-primary-600: #eab624;
+  --color-primary-700: #cfa01d;
+  --color-primary-800: #836715;
+  --color-primary-900: #413309;
+
+  --color-secondary-200: #e9e9e9;
+  --color-secondary-300: #d0d0d0;
+  --color-secondary-400: #a1a1a1;
+  --color-secondary-500: #767676;
+  --color-secondary-600: #616161;
+  --color-secondary-700: #424242;
+  --color-secondary-800: #323232;
+
+  --color-white: #ffffff;
+  --color-black: #000000;
+}
+/* stylelint-enable at-rule-no-unknown */
+
+/* CSS Reset (minimal, webview-friendly) */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+* {
+  margin-block: 0;
+}
+html,
+body {
+  height: 100%;
+}
+img,
+picture,
+video,
+canvas,
+svg {
+  display: block;
+  max-width: 100%;
+}
+input,
+button,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+}
+button {
+  background: none;
+}
+/* iOS 탭 하이라이트 제거 */
+body {
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+}
+/* 모션 최소화 접근성 */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+body {
+  background-color: #ffffff;
+  color: rgb(17 24 39);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* iOS 웹뷰 안전 영역 대응 */
+:root {
+  --safe-left: env(safe-area-inset-left);
+  --safe-right: env(safe-area-inset-right);
+  --safe-top: env(safe-area-inset-top);
+  --safe-bottom: env(safe-area-inset-bottom);
+}
