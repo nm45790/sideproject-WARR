@@ -18,7 +18,7 @@ export default function Header({ left, center, right }: HeaderProps) {
 
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           <div className="pointer-events-auto min-w-0 truncate">
-            {center ?? <h1 className="text-base font-semibold">Warr</h1>}
+            {center && center}
           </div>
         </div>
 

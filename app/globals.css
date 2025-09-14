@@ -1,3 +1,4 @@
+@import "./reset.css";
 @import "tailwindcss";
 
 /* Pretendard Variable 폰트 설정 */
@@ -61,39 +62,7 @@ html {
   --color-white: #ffffff;
   --color-black: #000000;
 }
-/* stylelint-enable at-rule-no-unknown */
 
-/* CSS Reset (minimal, webview-friendly) */
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-}
-* {
-  margin-block: 0;
-}
-html,
-body {
-  height: 100%;
-}
-img,
-picture,
-video,
-canvas,
-svg {
-  display: block;
-  max-width: 100%;
-}
-input,
-button,
-textarea,
-select {
-  font: inherit;
-  color: inherit;
-}
-button {
-  background: none;
-}
 /* iOS 탭 하이라이트 제거 */
 body {
   -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
