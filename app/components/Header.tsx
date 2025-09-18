@@ -10,10 +10,10 @@ type HeaderProps = {
 export default function Header({ left, center, right }: HeaderProps) {
   return (
     <header
-      className="sticky top-0 z-10 backdrop-blur bg-white/70 border-b"
+      className="sticky top-0 z-10 bg-white border-b border-gray-100"
       style={{ paddingTop: "var(--safe-top)" }}
     >
-      <div className="relative h-12 flex items-center px-4">
+      <div className="relative h-14 flex items-center px-5">
         <div className="flex-1 min-w-0 flex items-center gap-2">{left}</div>
 
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">

@@ -4,7 +4,7 @@ import theme from "@/app/utils/theme";
 import CombinedProvider from "@/app/components/CombinedProvider";
 
 export const metadata: Metadata = {
-  title: "Warr",
+  title: "🐶 Warr",
   description: "Warr",
 };
 

@@ -2,33 +2,39 @@
 import { useEffect, useState } from "react";
 import MainContainer from "./components/MainContainer";
 import Splash from "./components/Splash";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
-  const [splashFading, setSplashFading] = useState(false);
-  const [mainVisible, setMainVisible] = useState(false);
+  const router = useRouter();
+  const isProduction = process.env.NODE_ENV === "production";
+
+  const [splashFading, setSplashFading] = useState(isProduction ? false : true);
+  const [mainVisible, setMainVisible] = useState(isProduction ? false : true);
 
   useEffect(() => {
-    const fadeOutTimer = setTimeout(() => {
-      setSplashFading(true);
-    }, 900);
+    if (isProduction) {
+      const fadeOutTimer = setTimeout(() => {
+        setSplashFading(true);
+      }, 900);
 
-    const mainTimer = setTimeout(() => {
-      setMainVisible(true);
-    }, 1000);
+      const mainTimer = setTimeout(() => {
+        setMainVisible(true);
+      }, 1000);
 
-    return () => {
-      clearTimeout(fadeOutTimer);
-      clearTimeout(mainTimer);
-    };
+      return () => {
+        clearTimeout(fadeOutTimer);
+        clearTimeout(mainTimer);
+      };
+    }
   }, []);
 
   return (
-    <div className="relative">
+    <>
       {/* 메인 콘텐츠 */}
       <div
         className={`transition-all duration-700 ease-out ${
           mainVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
-        }`}
+        } w-full flex justify-center`}
       >
         <MainContainer visibleHeader={false}>
           <div className="bg-white relative w-full min-h-dvh px-5 flex flex-col">
@@ -56,7 +62,10 @@ export default function Home() {
             {/* 하단 버튼 영역 */}
             <div className="pb-8 space-y-4">
               {/* 왈 아이디로 로그인 버튼 */}
-              <button className="w-full bg-[#3f55ff] h-[59px] rounded-[7px] flex items-center justify-center cursor-pointer hover:bg-[#3646e6] transition-colors">
+              <button
+                className="w-full bg-[#3f55ff] h-[59px] rounded-[7px] flex items-center justify-center cursor-pointer hover:bg-[#3646e6] transition-colors"
+                onClick={() => router.push("/login")}
+              >
                 <span className="font-semibold text-white text-[16px]">
                   왈 아이디로 로그인
                 </span>
@@ -85,6 +94,6 @@ export default function Home() {
       >
         <Splash />
       </div>
-    </div>
+    </>
   );
 }
