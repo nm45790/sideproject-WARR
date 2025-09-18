@@ -31,6 +31,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
+        <link
+          href="https://unpkg.com/pretendard@1.3.9/dist/web/static/pretendard.css"
+          rel="stylesheet"
+        />
         <style dangerouslySetInnerHTML={{ __html: themeCss }} />
       </head>
       <body suppressHydrationWarning className="font-sans">
