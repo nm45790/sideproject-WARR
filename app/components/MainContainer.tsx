@@ -16,9 +16,9 @@ export const MainContainer = ({
   className?: string;
 }) => {
   return (
-    <div className="w-full flex justify-center">
+    <div className="w-full flex justify-center bg-gray-300">
       <div
-        className={`mx-auto w-full max-w-[768px] min-h-dvh flex flex-col ${className || ""}`}
+        className={`mx-auto w-full max-w-[768px] min-h-dvh flex flex-col ${className || ""} bg-white`}
         style={{
           paddingLeft: "var(--safe-left)",
           paddingRight: "var(--safe-right)",

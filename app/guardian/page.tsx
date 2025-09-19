@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import MainContainer from "./components/MainContainer";
-import Splash from "./components/Splash";
+import MainContainer from "../components/MainContainer";
+import Splash from "../components/Splash";
 import { useRouter } from "next/navigation";
 
-export default function Home() {
+export default function Guardian() {
   const router = useRouter();
   const isProduction = process.env.NODE_ENV === "production";
 
