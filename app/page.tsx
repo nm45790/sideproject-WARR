@@ -74,7 +74,10 @@ export default function Home() {
 
               {/* 왈 아이디로 회원가입 버튼 */}
               <div className="flex items-center justify-center py-3">
-                <button className="relative cursor-pointer">
+                <button
+                  className="relative cursor-pointer"
+                  onClick={() => router.push("/join")}
+                >
                   <span className="font-semibold text-[#363e4a] text-[16px] hover:text-[#2a3238] transition-colors relative">
                     왈 아이디로 회원가입
                     <div className="absolute border-[#363e4a] border-[0px_0px_1px] border-solid bottom-[-0.5px] left-0 right-0" />

@@ -5,6 +5,16 @@ import MainContainer from "../components/MainContainer";
 import Icons from "../components/Icons";
 import { authService } from "../utils/auth";
 
+// 테스트 계정
+// {
+//   "memberId": "user",
+//   "password": "password123"
+// }
+
+// {
+//   "memberId": "academy",
+//   "password": "password123"
+// }
 export default function LoginPage() {
   const router = useRouter();
   const [id, setId] = useState("");
@@ -72,6 +82,13 @@ export default function LoginPage() {
 
       {/* 입력 필드 영역 */}
       <div className="flex-1 flex flex-col">
+        {/* 에러 메시지 */}
+        {error && (
+          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+            <p className="text-red-600 text-sm font-medium">{error}</p>
+          </div>
+        )}
+
         {/* 첫 번째 입력 필드 */}
         <div className="mb-[16px]">
           <input
@@ -104,71 +121,27 @@ export default function LoginPage() {
           />
         </div>
 
-        {/* 입력 필드 영역 */}
-        <div className="flex-1 flex flex-col">
-          {/* 에러 메시지 */}
-          {error && (
-            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-              <p className="text-red-600 text-sm font-medium">{error}</p>
-            </div>
-          )}
-
-          {/* 첫 번째 입력 필드 */}
-          <div className="mb-[16px]">
-            <input
-              type="text"
-              value={id}
-              onChange={(e) => setId(e.target.value)}
-              onFocus={() => setIsIdFocused(true)}
-              onBlur={() => setIsIdFocused(false)}
-              placeholder="아이디를 입력해주세요"
-              className={`w-full h-[59px] border-[1.5px] rounded-[7px] px-5 text-[16px] font-medium outline-none transition-colors ${
-                isIdFocused || id ? "border-[#3f55ff]" : "border-[#d2d2d2]"
-              } placeholder:text-[#d2d2d2] placeholder:font-medium`}
-            />
-          </div>
-
-          {/* 두 번째 입력 필드 */}
-          <div className="mb-[25px]">
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              onFocus={() => setIsPasswordFocused(true)}
-              onBlur={() => setIsPasswordFocused(false)}
-              placeholder="비밀번호를 입력해주세요"
-              className={`w-full h-[59px] border-[1.5px] rounded-[7px] px-5 text-[16px] font-medium outline-none transition-colors ${
-                isPasswordFocused || password
-                  ? "border-[#3f55ff]"
-                  : "border-[#d2d2d2]"
-              } placeholder:text-[#d2d2d2] placeholder:font-medium`}
-            />
-          </div>
-
-          {/* 로그인 버튼 */}
-          <button
-            onClick={handleLogin}
-            disabled={isLoading || !id.trim() || !password.trim()}
-            className={`w-full h-[59px] rounded-[7px] flex items-center justify-center transition-colors mb-[25px] ${
-              isLoading || !id.trim() || !password.trim()
-                ? "bg-gray-300 cursor-not-allowed"
-                : "bg-[#3f55ff] hover:bg-[#3646e6] cursor-pointer"
-            }`}
-          >
-            {isLoading ? (
-              <div className="flex items-center">
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
-                <span className="font-semibold text-white text-[16px]">
-                  로그인 중...
-                </span>
-              </div>
-            ) : (
+        {/* 로그인 버튼 */}
+        <button
+          onClick={handleLogin}
+          disabled={isLoading || !id.trim() || !password.trim()}
+          className={`w-full h-[59px] rounded-[7px] flex items-center justify-center transition-colors mb-[25px] ${
+            isLoading || !id.trim() || !password.trim()
+              ? "bg-gray-300 cursor-not-allowed"
+              : "bg-[#3f55ff] hover:bg-[#3646e6] cursor-pointer"
+          }`}
+        >
+          {isLoading ? (
+            <div className="flex items-center">
+              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
               <span className="font-semibold text-white text-[16px]">
-                로그인
+                로그인 중...
               </span>
-            )}
-          </button>
-        </div>
+            </div>
+          ) : (
+            <span className="font-semibold text-white text-[16px]">로그인</span>
+          )}
+        </button>
       </div>
     </MainContainer>
   );
