@@ -5,6 +5,7 @@ import MainContainer from "../components/MainContainer";
 import Splash from "../components/Splash";
 import { useRouter } from "next/navigation";
 
+// 보호자 페이지
 export default function Guardian() {
   const router = useRouter();
   const isProduction = process.env.NODE_ENV === "production";
@@ -37,7 +38,7 @@ export default function Guardian() {
           mainVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
         } w-full flex justify-center`}
       >
-        <MainContainer visibleHeader={false}>
+        <MainContainer>
           <div className="bg-white relative w-full min-h-dvh px-5 flex flex-col">
             {/* 상단 콘텐츠 영역 */}
             <div className="pt-[108px] flex-1">

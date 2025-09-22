@@ -1,18 +1,8 @@
-import Header from "./Header";
-
 export const MainContainer = ({
   children,
-  visibleHeader = false,
-  headerLeft,
-  headerCenter,
-  headerRight,
   className,
 }: {
   children: React.ReactNode;
-  visibleHeader?: boolean;
-  headerLeft?: React.ReactNode;
-  headerCenter?: React.ReactNode;
-  headerRight?: React.ReactNode;
   className?: string;
 }) => {
   return (
@@ -24,14 +14,13 @@ export const MainContainer = ({
           paddingRight: "var(--safe-right)",
         }}
       >
-        {visibleHeader && (
-          <Header left={headerLeft} center={headerCenter} right={headerRight} />
-        )}
         <main
           className="flex-1"
           style={{ paddingBottom: "var(--safe-bottom)" }}
         >
-          {children}
+          <div className="bg-white relative w-full min-h-dvh px-5 flex flex-col">
+            {children}
+          </div>
         </main>
       </div>
     </div>
