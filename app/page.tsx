@@ -76,7 +76,7 @@ export default function Home() {
               <div className="flex items-center justify-center py-3">
                 <button
                   className="relative cursor-pointer"
-                  onClick={() => router.push("/join")}
+                  onClick={() => router.push("/signup/terms")}
                 >
                   <span className="font-semibold text-[#363e4a] text-[16px] hover:text-[#2a3238] transition-colors relative">
                     왈 아이디로 회원가입
