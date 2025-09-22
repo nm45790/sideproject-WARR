@@ -1,8 +1,9 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import MainContainer from "../../components/MainContainer";
 import Icons from "../../components/Icons";
+import { useSignupStore } from "../../store/signupStore";
 
 type Agreement = {
   id: string;
@@ -11,43 +12,85 @@ type Agreement = {
   checked: boolean;
 };
 
-export default function JoinPage() {
+export default function TermsPage() {
   const router = useRouter();
+  const { signupData, updateTermsSelectOption, isAllRequiredTermsAgreed } =
+    useSignupStore();
 
   const [agreements, setAgreements] = useState<Agreement[]>([
     {
       id: "service",
       title: "(필수) 서비스 이용약관 동의",
       required: true,
-      checked: false,
+      checked: signupData.termsSelectOption.service,
     },
     {
       id: "privacy",
       title: "(필수) 개인정보 수집 및 이용 동의",
       required: true,
-      checked: false,
+      checked: signupData.termsSelectOption.privacy,
     },
     {
       id: "thirdParty",
       title: "(필수) 개인정보 제3자 제공 동의",
       required: true,
-      checked: false,
+      checked: signupData.termsSelectOption.thirdParty,
     },
     {
       id: "payment",
       title: "(필수) 결제 서비스 이용약관",
       required: true,
-      checked: false,
+      checked: signupData.termsSelectOption.payment,
     },
     {
       id: "marketing",
       title: "(선택) 광고성 정보 수신 전체 동의",
       required: false,
-      checked: false,
+      checked: signupData.termsSelectOption.marketing,
     },
   ]);
 
-  const [allAgreed, setAllAgreed] = useState(false);
+  const [allAgreed, setAllAgreed] = useState(
+    Object.values(signupData.termsSelectOption).every(Boolean),
+  );
+
+  // Store 상태와 로컬 상태 동기화
+  useEffect(() => {
+    setAgreements([
+      {
+        id: "service",
+        title: "(필수) 서비스 이용약관 동의",
+        required: true,
+        checked: signupData.termsSelectOption.service,
+      },
+      {
+        id: "privacy",
+        title: "(필수) 개인정보 수집 및 이용 동의",
+        required: true,
+        checked: signupData.termsSelectOption.privacy,
+      },
+      {
+        id: "thirdParty",
+        title: "(필수) 개인정보 제3자 제공 동의",
+        required: true,
+        checked: signupData.termsSelectOption.thirdParty,
+      },
+      {
+        id: "payment",
+        title: "(필수) 결제 서비스 이용약관",
+        required: true,
+        checked: signupData.termsSelectOption.payment,
+      },
+      {
+        id: "marketing",
+        title: "(선택) 광고성 정보 수신 전체 동의",
+        required: false,
+        checked: signupData.termsSelectOption.marketing,
+      },
+    ]);
+
+    setAllAgreed(Object.values(signupData.termsSelectOption).every(Boolean));
+  }, [signupData.termsSelectOption]);
 
   const handleGoBack = () => {
     router.back();
@@ -56,17 +99,32 @@ export default function JoinPage() {
   const handleAllAgreeToggle = () => {
     const newAllAgreed = !allAgreed;
     setAllAgreed(newAllAgreed);
-    setAgreements((prev) =>
-      prev.map((agreement) => ({ ...agreement, checked: newAllAgreed })),
-    );
+
+    // Store 업데이트
+    updateTermsSelectOption({
+      service: newAllAgreed,
+      privacy: newAllAgreed,
+      thirdParty: newAllAgreed,
+      payment: newAllAgreed,
+      marketing: newAllAgreed,
+    });
   };
 
   const handleAgreementToggle = (id: string) => {
+    const agreement = agreements.find((a) => a.id === id);
+    if (!agreement) return;
+
+    const newChecked = !agreement.checked;
+
+    // Store 업데이트
+    updateTermsSelectOption({
+      [id]: newChecked,
+    });
+
+    // 로컬 상태 업데이트
     setAgreements((prev) => {
       const updated = prev.map((agreement) =>
-        agreement.id === id
-          ? { ...agreement, checked: !agreement.checked }
-          : agreement,
+        agreement.id === id ? { ...agreement, checked: newChecked } : agreement,
       );
 
       // 전체 동의 상태 업데이트
@@ -82,13 +140,12 @@ export default function JoinPage() {
     console.log(`View terms for: ${id}`);
   };
 
-  const requiredAgreements = agreements.filter((a) => a.required);
-  const allRequiredChecked = requiredAgreements.every((a) => a.checked);
+  const allRequiredChecked = isAllRequiredTermsAgreed();
 
-  const handleJoin = () => {
+  const handleNext = () => {
     if (allRequiredChecked) {
-      // TODO: 회원가입 로직
-      console.log("회원가입 진행");
+      // 다음 단계로 이동 (예: 상세 정보 입력)
+      router.push("/signup/details");
     }
   };
 
@@ -165,7 +222,7 @@ export default function JoinPage() {
 
         {/* 동의하고 가입하기 버튼 */}
         <button
-          onClick={handleJoin}
+          onClick={handleNext}
           disabled={!allRequiredChecked}
           className={`w-full h-[59px] rounded-[7px] flex items-center justify-center transition-colors ${
             allRequiredChecked

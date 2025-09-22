@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+
 import { useRouter } from "next/navigation";
 import MainContainer from "../../components/MainContainer";
 import Icons from "../../components/Icons";
@@ -17,7 +17,8 @@ export default function TermsPage() {
   const { signupData, updateTermsSelectOption, isAllRequiredTermsAgreed } =
     useSignupStore();
 
-  const [agreements, setAgreements] = useState<Agreement[]>([
+  // Store 데이터를 기반으로 agreements 배열 생성
+  const agreements: Agreement[] = [
     {
       id: "service",
       title: "(필수) 서비스 이용약관 동의",
@@ -48,49 +49,10 @@ export default function TermsPage() {
       required: false,
       checked: signupData.termsSelectOption.marketing,
     },
-  ]);
+  ];
 
-  const [allAgreed, setAllAgreed] = useState(
-    Object.values(signupData.termsSelectOption).every(Boolean),
-  );
-
-  // Store 상태와 로컬 상태 동기화
-  useEffect(() => {
-    setAgreements([
-      {
-        id: "service",
-        title: "(필수) 서비스 이용약관 동의",
-        required: true,
-        checked: signupData.termsSelectOption.service,
-      },
-      {
-        id: "privacy",
-        title: "(필수) 개인정보 수집 및 이용 동의",
-        required: true,
-        checked: signupData.termsSelectOption.privacy,
-      },
-      {
-        id: "thirdParty",
-        title: "(필수) 개인정보 제3자 제공 동의",
-        required: true,
-        checked: signupData.termsSelectOption.thirdParty,
-      },
-      {
-        id: "payment",
-        title: "(필수) 결제 서비스 이용약관",
-        required: true,
-        checked: signupData.termsSelectOption.payment,
-      },
-      {
-        id: "marketing",
-        title: "(선택) 광고성 정보 수신 전체 동의",
-        required: false,
-        checked: signupData.termsSelectOption.marketing,
-      },
-    ]);
-
-    setAllAgreed(Object.values(signupData.termsSelectOption).every(Boolean));
-  }, [signupData.termsSelectOption]);
+  // 전체 동의 상태 계산
+  const allAgreed = Object.values(signupData.termsSelectOption).every(Boolean);
 
   const handleGoBack = () => {
     router.back();
@@ -98,7 +60,6 @@ export default function TermsPage() {
 
   const handleAllAgreeToggle = () => {
     const newAllAgreed = !allAgreed;
-    setAllAgreed(newAllAgreed);
 
     // Store 업데이트
     updateTermsSelectOption({
@@ -119,19 +80,6 @@ export default function TermsPage() {
     // Store 업데이트
     updateTermsSelectOption({
       [id]: newChecked,
-    });
-
-    // 로컬 상태 업데이트
-    setAgreements((prev) => {
-      const updated = prev.map((agreement) =>
-        agreement.id === id ? { ...agreement, checked: newChecked } : agreement,
-      );
-
-      // 전체 동의 상태 업데이트
-      const allChecked = updated.every((agreement) => agreement.checked);
-      setAllAgreed(allChecked);
-
-      return updated;
     });
   };
 
