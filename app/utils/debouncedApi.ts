@@ -16,7 +16,7 @@ interface ApiRequest {
 export const useDebouncedApi = (options: DebouncedApiOptions = {}) => {
   const {
     delay = 500,
-    baseUrl = "",
+    baseUrl = process.env.NEXT_PUBLIC_API_URL || "",
     defaultHeaders = { "Content-Type": "application/json" },
   } = options;
 

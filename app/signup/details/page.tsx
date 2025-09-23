@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import MainContainer from "../../components/MainContainer";
 import Icons from "../../components/Icons";
 import { useSignupStore } from "../../store/signupStore";
+import useDebouncedApi from "../../utils/debouncedApi";
 
 export default function DetailsPage() {
   const router = useRouter();
@@ -23,6 +24,10 @@ export default function DetailsPage() {
   const [isNameFocused, setIsNameFocused] = useState(false);
   const [isPhoneFocused, setIsPhoneFocused] = useState(false);
   const [isEmailFocused, setIsEmailFocused] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // 디바운스 API 훅 사용
+  const api = useDebouncedApi();
 
   // localStorage에서 저장된 값으로 초기값 설정
   useEffect(() => {
@@ -108,9 +113,33 @@ export default function DetailsPage() {
     }
   };
 
-  const handleNext = () => {
-    if (isSignupDataComplete()) {
+  const handleNext = async () => {
+    if (!isSignupDataComplete()) {
+      return;
+    }
+
+    if (!signupData.phone) {
+      alert("전화번호가 없습니다.");
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      await api.execute({
+        url: "/api/v1/phone-verification/send-code",
+        method: "POST",
+        data: { phoneNumber: signupData.phone },
+      });
+
+      alert("인증번호가 발송되었습니다.");
       router.push("/signup/verify");
+    } catch (err) {
+      alert(
+        err instanceof Error ? err.message : "인증번호 발송에 실패했습니다.",
+      );
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -237,14 +266,16 @@ export default function DetailsPage() {
         {/* 다음 버튼 */}
         <button
           onClick={handleNext}
-          disabled={!isFormValid}
+          disabled={!isFormValid || isLoading}
           className={`w-full h-[59px] rounded-[7px] flex items-center justify-center transition-colors ${
-            isFormValid
+            isFormValid && !isLoading
               ? "bg-[#3f55ff] hover:bg-[#3646e6] cursor-pointer"
               : "bg-[#f0f0f0] cursor-not-allowed"
           }`}
         >
-          <span className="font-semibold text-[16px] text-white">다음</span>
+          <span className="font-semibold text-[16px] text-white">
+            {isLoading ? "발송중..." : "다음"}
+          </span>
         </button>
       </div>
     </MainContainer>

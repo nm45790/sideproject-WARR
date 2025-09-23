@@ -20,10 +20,7 @@ export default function VerifyPage() {
   const [isCodeSent, setIsCodeSent] = useState(false);
 
   // 디바운스 API 훅 사용
-  const api = useDebouncedApi({
-    delay: 300,
-    baseUrl: process.env.NEXT_PUBLIC_API_URL || "",
-  });
+  const api = useDebouncedApi();
 
   // 타이머 효과
   useEffect(() => {
