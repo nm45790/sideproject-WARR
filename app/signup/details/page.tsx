@@ -11,15 +11,15 @@ export default function DetailsPage() {
   const router = useRouter();
   const {
     signupData,
-    updateName,
-    updatePhone,
-    updateEmail,
+    updateMemberName,
+    updateMemberPhone,
+    updateMemberEmail,
     isSignupDataComplete,
   } = useSignupStore();
 
-  const [name, setName] = useState(signupData.name);
-  const [phone, setPhone] = useState(signupData.phone);
-  const [email, setEmail] = useState(signupData.email);
+  const [name, setName] = useState(signupData.memberName || "");
+  const [phone, setPhone] = useState(signupData.memberPhone || "");
+  const [email, setEmail] = useState(signupData.memberEmail || "");
   const [emailDomain, setEmailDomain] = useState("");
   const [isNameFocused, setIsNameFocused] = useState(false);
   const [isPhoneFocused, setIsPhoneFocused] = useState(false);
@@ -31,12 +31,12 @@ export default function DetailsPage() {
 
   // localStorage에서 저장된 값으로 초기값 설정
   useEffect(() => {
-    setName(signupData.name);
-    setPhone(signupData.phone);
+    setName(signupData.memberName || "");
+    setPhone(signupData.memberPhone || "");
 
     // 이메일 처리
-    if (signupData.email && signupData.email.includes("@")) {
-      const [emailId, domain] = signupData.email.split("@");
+    if (signupData.memberEmail && signupData.memberEmail.includes("@")) {
+      const [emailId, domain] = signupData.memberEmail.split("@");
       setEmail(emailId);
       // 도메인이 선택된 옵션 중 하나인지 확인
       const validDomains = [
@@ -50,11 +50,13 @@ export default function DetailsPage() {
         setEmailDomain(domain);
       } else {
         setEmailDomain("직접입력");
-        setEmail(signupData.email); // 전체 이메일을 그대로 표시
+        setEmail(signupData.memberEmail); // 전체 이메일을 그대로 표시
       }
     } else {
-      setEmail(signupData.email);
-      setEmailDomain("");
+      setEmail(signupData.memberEmail || "");
+      if (emailDomain !== "직접입력") {
+        setEmailDomain("");
+      }
     }
   }, [signupData]);
 
@@ -64,9 +66,10 @@ export default function DetailsPage() {
 
   const handleNameChange = (value: string) => {
     // 한글과 영어만 허용 (특수문자, 숫자 제거)
-    const filteredValue = value.replace(/[^가-힣a-zA-Z\s]/g, "");
+    // 더 넓은 범위의 한글 문자 포함 (자모, 완성형, 호환형)
+    const filteredValue = value.replace(/[^가-힣ㄱ-ㅎㅏ-ㅣa-zA-Z\s]/g, "");
     setName(filteredValue);
-    updateName(filteredValue);
+    updateMemberName(filteredValue);
   };
 
   const formatPhoneNumber = (value: string) => {
@@ -86,30 +89,30 @@ export default function DetailsPage() {
   const handlePhoneChange = (value: string) => {
     const formatted = formatPhoneNumber(value);
     setPhone(formatted);
-    updatePhone(formatted);
+    updateMemberPhone(formatted);
   };
 
   const handleEmailChange = (value: string) => {
     setEmail(value);
-    // 직접 입력인 경우에만 전체 이메일로 저장
+    // 직접 입력인 경우에만 전체 이메일로 저장 (이미 @ 포함된 경우)
     if (emailDomain === "직접입력") {
-      updateEmail(value);
-    } else {
+      updateMemberEmail(value);
+    } else if (emailDomain && emailDomain !== "") {
       // 선택된 도메인이 있으면 조합해서 저장
       const emailId = value;
-      updateEmail(`${emailId}@${emailDomain}`);
+      updateMemberEmail(`${emailId}@${emailDomain}`);
     }
   };
 
   const handleEmailDomainChange = (value: string) => {
     setEmailDomain(value);
     if (value === "직접입력") {
-      // 직접입력 선택 시 현재 이메일 그대로 유지 (이미 전체 이메일이면 그대로, 아니면 현재 입력값 그대로)
-      updateEmail(email);
-    } else if (value) {
+      // 직접입력 선택 시 현재 이메일 그대로 유지하고 emailDomain을 "직접입력"으로 유지
+      updateMemberEmail(email);
+    } else if (value && value !== "") {
       // 도메인 선택 시 아이디와 조합
       const emailId = email.split("@")[0] || "";
-      updateEmail(`${emailId}@${value}`);
+      updateMemberEmail(`${emailId}@${value}`);
     }
   };
 
@@ -118,7 +121,7 @@ export default function DetailsPage() {
       return;
     }
 
-    if (!signupData.phone) {
+    if (!signupData.memberPhone) {
       alert("전화번호가 없습니다.");
       return;
     }
@@ -129,7 +132,7 @@ export default function DetailsPage() {
       await api.execute({
         url: "/api/v1/phone-verification/send-code",
         method: "POST",
-        data: { phoneNumber: signupData.phone },
+        data: { phoneNumber: signupData.memberPhone },
       });
 
       alert("인증번호가 발송되었습니다.");
@@ -248,16 +251,17 @@ export default function DetailsPage() {
                 backgroundPosition: "right 8px center",
                 backgroundRepeat: "no-repeat",
                 backgroundSize: "16px",
+                color: emailDomain === "" ? "#D2D2D2" : "#363e4a",
               }}
             >
               <option value="" disabled>
                 선택하기
               </option>
-              <option value="gmail.com">@gmail.com</option>
-              <option value="naver.com">@naver.com</option>
-              <option value="hanmail.net">@hanmail.net</option>
-              <option value="kakao.com">@kakao.com</option>
-              <option value="daum.net">@daum.net</option>
+              <option value="gmail.com">gmail.com</option>
+              <option value="naver.com">naver.com</option>
+              <option value="hanmail.net">hanmail.net</option>
+              <option value="kakao.com">kakao.com</option>
+              <option value="daum.net">daum.net</option>
               <option value="직접입력">직접입력</option>
             </select>
           </div>

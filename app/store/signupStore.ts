@@ -10,12 +10,12 @@ export interface TermsSelectOption {
 }
 
 export interface SignupData {
+  memberId: string;
+  memberPassword: string;
+  memberPhone: string;
+  memberName: string;
+  memberEmail: string;
   termsSelectOption: TermsSelectOption;
-  name: string;
-  phone: string;
-  email: string;
-  id: string;
-  password: string;
 }
 
 interface SignupStore {
@@ -23,12 +23,12 @@ interface SignupStore {
   signupData: SignupData;
 
   // 액션
+  updateMemberId: (memberId: string) => void;
+  updateMemberPassword: (memberPassword: string) => void;
+  updateMemberPhone: (memberPhone: string) => void;
+  updateMemberName: (memberName: string) => void;
+  updateMemberEmail: (memberEmail: string) => void;
   updateTermsSelectOption: (terms: Partial<TermsSelectOption>) => void;
-  updateName: (name: string) => void;
-  updatePhone: (phone: string) => void;
-  updateEmail: (email: string) => void;
-  updateId: (id: string) => void;
-  updatePassword: (password: string) => void;
   updateSignupData: (data: Partial<SignupData>) => void;
   resetSignupData: () => void;
 
@@ -38,6 +38,11 @@ interface SignupStore {
 }
 
 const initialSignupData: SignupData = {
+  memberId: "",
+  memberPassword: "",
+  memberPhone: "",
+  memberName: "",
+  memberEmail: "",
   termsSelectOption: {
     service: false,
     privacy: false,
@@ -45,11 +50,6 @@ const initialSignupData: SignupData = {
     payment: false,
     marketing: false,
   },
-  name: "",
-  phone: "",
-  email: "",
-  id: "",
-  password: "",
 };
 
 export const useSignupStore = create<SignupStore>()(
@@ -57,6 +57,51 @@ export const useSignupStore = create<SignupStore>()(
     (set, get) => ({
       // 초기 상태
       signupData: initialSignupData,
+
+      // 회원 ID 업데이트
+      updateMemberId: (memberId) =>
+        set((state) => ({
+          signupData: {
+            ...state.signupData,
+            memberId,
+          },
+        })),
+
+      // 회원 비밀번호 업데이트
+      updateMemberPassword: (memberPassword) =>
+        set((state) => ({
+          signupData: {
+            ...state.signupData,
+            memberPassword,
+          },
+        })),
+
+      // 회원 전화번호 업데이트
+      updateMemberPhone: (memberPhone) =>
+        set((state) => ({
+          signupData: {
+            ...state.signupData,
+            memberPhone,
+          },
+        })),
+
+      // 회원 이름 업데이트
+      updateMemberName: (memberName) =>
+        set((state) => ({
+          signupData: {
+            ...state.signupData,
+            memberName,
+          },
+        })),
+
+      // 회원 이메일 업데이트
+      updateMemberEmail: (memberEmail) =>
+        set((state) => ({
+          signupData: {
+            ...state.signupData,
+            memberEmail,
+          },
+        })),
 
       // 약관 동의 업데이트
       updateTermsSelectOption: (terms) =>
@@ -67,51 +112,6 @@ export const useSignupStore = create<SignupStore>()(
               ...state.signupData.termsSelectOption,
               ...terms,
             },
-          },
-        })),
-
-      // 이름 업데이트
-      updateName: (name) =>
-        set((state) => ({
-          signupData: {
-            ...state.signupData,
-            name,
-          },
-        })),
-
-      // 전화번호 업데이트
-      updatePhone: (phone) =>
-        set((state) => ({
-          signupData: {
-            ...state.signupData,
-            phone,
-          },
-        })),
-
-      // 이메일 업데이트
-      updateEmail: (email) =>
-        set((state) => ({
-          signupData: {
-            ...state.signupData,
-            email,
-          },
-        })),
-
-      // 아이디 업데이트
-      updateId: (id) =>
-        set((state) => ({
-          signupData: {
-            ...state.signupData,
-            id,
-          },
-        })),
-
-      // 비밀번호 업데이트
-      updatePassword: (password) =>
-        set((state) => ({
-          signupData: {
-            ...state.signupData,
-            password,
           },
         })),
 
@@ -146,11 +146,11 @@ export const useSignupStore = create<SignupStore>()(
         const { signupData } = get();
         return (
           get().isAllRequiredTermsAgreed() &&
-          signupData.name?.trim() !== "" &&
-          signupData.phone?.trim() !== "" &&
-          signupData.email?.trim() !== "" &&
-          signupData.id?.trim() !== "" &&
-          signupData.password?.trim() !== ""
+          signupData.memberName?.trim() !== "" &&
+          signupData.memberPhone?.trim() !== "" &&
+          signupData.memberEmail?.trim() !== "" &&
+          signupData.memberId?.trim() !== "" &&
+          signupData.memberPassword?.trim() !== ""
         );
       },
     }),

@@ -50,7 +50,7 @@ export default function VerifyPage() {
   };
 
   const handleSendCode = async () => {
-    if (!signupData.phone) {
+    if (!signupData.memberPhone) {
       setError("전화번호가 없습니다.");
       return;
     }
@@ -63,7 +63,7 @@ export default function VerifyPage() {
       await api.execute({
         url: "/api/v1/phone-verification/send-code",
         method: "POST",
-        data: { phoneNumber: signupData.phone },
+        data: { phoneNumber: signupData.memberPhone },
       });
 
       setSuccess("인증번호가 발송되었습니다.");
@@ -99,7 +99,7 @@ export default function VerifyPage() {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            phoneNumber: signupData.phone,
+            phoneNumber: signupData.memberPhone,
             verificationCode: codeToVerify,
           }),
         },
@@ -151,7 +151,7 @@ export default function VerifyPage() {
         <div className="mb-[24px]">
           <div className="w-full h-[59px] rounded-[7px] px-5 flex items-center justify-center">
             <span className="text-[16px] font-medium text-[#363e4a]">
-              {signupData.phone}
+              {signupData.memberPhone}
             </span>
           </div>
         </div>

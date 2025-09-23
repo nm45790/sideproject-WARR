@@ -9,11 +9,15 @@ import useDebouncedApi from "../../utils/debouncedApi";
 
 export default function AccountPage() {
   const router = useRouter();
-  const { signupData, updateId, updatePassword, isSignupDataComplete } =
-    useSignupStore();
+  const {
+    signupData,
+    updateMemberId,
+    updateMemberPassword,
+    isSignupDataComplete,
+  } = useSignupStore();
 
-  const [id, setId] = useState(signupData.id || "");
-  const [password, setPassword] = useState(signupData.password || "");
+  const [id, setId] = useState(signupData.memberId || "");
+  const [password, setPassword] = useState(signupData.memberPassword || "");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isIdFocused, setIsIdFocused] = useState(false);
   const [isPasswordFocused, setIsPasswordFocused] = useState(false);
@@ -27,8 +31,8 @@ export default function AccountPage() {
 
   // localStorage에서 저장된 값으로 초기값 설정
   useEffect(() => {
-    setId(signupData.id || "");
-    setPassword(signupData.password || "");
+    setId(signupData.memberId || "");
+    setPassword(signupData.memberPassword || "");
   }, [signupData]);
 
   const handleGoBack = () => {
@@ -39,12 +43,12 @@ export default function AccountPage() {
     // 영문자와 숫자만 허용
     const filteredValue = value.replace(/[^a-zA-Z0-9]/g, "");
     setId(filteredValue);
-    updateId(filteredValue);
+    updateMemberId(filteredValue);
   };
 
   const handlePasswordChange = (value: string) => {
     setPassword(value);
-    updatePassword(value);
+    updateMemberPassword(value);
     setPasswordError("");
   };
 
@@ -69,19 +73,22 @@ export default function AccountPage() {
     try {
       // 회원가입 API 호출
       await api.execute({
-        url: "/api/v1/auth/signup",
+        url: "/api/v1/members/step1",
         method: "POST",
         data: {
-          name: signupData.name,
-          phone: signupData.phone,
-          email: signupData.email,
-          id: signupData.id,
-          password: signupData.password,
+          memberId: signupData.memberId,
+          memberPassword: signupData.memberPassword,
+          memberPhone: signupData.memberPhone,
+          memberName: signupData.memberName,
+          memberEmail: signupData.memberEmail,
+          agreeTerms: signupData.termsSelectOption.service,
+          agreePrivacy: signupData.termsSelectOption.privacy,
+          agreeMarketing: signupData.termsSelectOption.marketing,
         },
       });
 
       alert("회원가입이 완료되었습니다!");
-      router.push("/login");
+      router.push("/signup/role");
     } catch (err) {
       alert(err instanceof Error ? err.message : "회원가입에 실패했습니다.");
     } finally {
