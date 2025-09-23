@@ -14,6 +14,8 @@ export interface SignupData {
   name: string;
   phone: string;
   email: string;
+  id: string;
+  password: string;
 }
 
 interface SignupStore {
@@ -25,6 +27,8 @@ interface SignupStore {
   updateName: (name: string) => void;
   updatePhone: (phone: string) => void;
   updateEmail: (email: string) => void;
+  updateId: (id: string) => void;
+  updatePassword: (password: string) => void;
   updateSignupData: (data: Partial<SignupData>) => void;
   resetSignupData: () => void;
 
@@ -44,6 +48,8 @@ const initialSignupData: SignupData = {
   name: "",
   phone: "",
   email: "",
+  id: "",
+  password: "",
 };
 
 export const useSignupStore = create<SignupStore>()(
@@ -91,6 +97,24 @@ export const useSignupStore = create<SignupStore>()(
           },
         })),
 
+      // 아이디 업데이트
+      updateId: (id) =>
+        set((state) => ({
+          signupData: {
+            ...state.signupData,
+            id,
+          },
+        })),
+
+      // 비밀번호 업데이트
+      updatePassword: (password) =>
+        set((state) => ({
+          signupData: {
+            ...state.signupData,
+            password,
+          },
+        })),
+
       // 전체 데이터 업데이트
       updateSignupData: (data) =>
         set((state) => ({
@@ -122,9 +146,11 @@ export const useSignupStore = create<SignupStore>()(
         const { signupData } = get();
         return (
           get().isAllRequiredTermsAgreed() &&
-          signupData.name.trim() !== "" &&
-          signupData.phone.trim() !== "" &&
-          signupData.email.trim() !== ""
+          signupData.name?.trim() !== "" &&
+          signupData.phone?.trim() !== "" &&
+          signupData.email?.trim() !== "" &&
+          signupData.id?.trim() !== "" &&
+          signupData.password?.trim() !== ""
         );
       },
     }),
