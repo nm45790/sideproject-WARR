@@ -6,6 +6,7 @@ import MainContainer from "../../components/MainContainer";
 import Icons from "../../components/Icons";
 import { useSignupStore } from "../../store/signupStore";
 import useDebouncedApi from "../../utils/debouncedApi";
+import { authService } from "../../utils/auth";
 
 export default function AccountPage() {
   const router = useRouter();
@@ -15,6 +16,21 @@ export default function AccountPage() {
     updateMemberPassword,
     isSignupDataComplete,
   } = useSignupStore();
+
+  // 필수 약관 동의 체크
+  useEffect(() => {
+    const requiredTerms = [
+      signupData.termsSelectOption.service,
+      signupData.termsSelectOption.privacy,
+      signupData.termsSelectOption.thirdParty,
+      signupData.termsSelectOption.payment,
+    ];
+
+    if (!requiredTerms.every(Boolean)) {
+      alert("잘못된 접근입니다.");
+      router.push("/signup/terms");
+    }
+  }, [router, signupData.termsSelectOption]);
 
   const [id, setId] = useState(signupData.memberId || "");
   const [password, setPassword] = useState(signupData.memberPassword || "");
@@ -92,8 +108,30 @@ export default function AccountPage() {
         },
       });
 
-      alert("회원가입이 완료되었습니다!");
-      router.push("/signup/role");
+      // 회원가입 성공 후 자동 로그인
+      const loginResult = await authService.login({
+        memberId: signupData.memberId,
+        password: signupData.memberPassword,
+      });
+
+      if (loginResult.success) {
+        alert("회원가입이 완료되었습니다!");
+        // 로그인 성공 시 역할에 따라 리다이렉트
+        if (loginResult.data?.data.role === "USER") {
+          router.push("/guardian");
+        } else if (loginResult.data?.data.role === "ACADEMY") {
+          router.push("/academy");
+        } else if (loginResult.data?.data.role === "TEMP") {
+          router.push("/signup/role");
+        } else {
+          router.push("/signup/role");
+        }
+      } else {
+        alert(
+          "회원가입은 완료되었지만 자동 로그인에 실패했습니다. 다시 로그인해주세요.",
+        );
+        router.push("/login");
+      }
     } catch (err) {
       alert(err instanceof Error ? err.message : "회원가입에 실패했습니다.");
     } finally {

@@ -14,8 +14,23 @@ export default function DetailsPage() {
     updateMemberName,
     updateMemberPhone,
     updateMemberEmail,
-    isSignupDataComplete,
+    isDetailsDataComplete,
   } = useSignupStore();
+
+  // 필수 약관 동의 체크
+  useEffect(() => {
+    const requiredTerms = [
+      signupData.termsSelectOption.service,
+      signupData.termsSelectOption.privacy,
+      signupData.termsSelectOption.thirdParty,
+      signupData.termsSelectOption.payment,
+    ];
+
+    if (!requiredTerms.every(Boolean)) {
+      alert("잘못된 접근입니다.");
+      router.push("/signup/terms");
+    }
+  }, [router, signupData.termsSelectOption]);
 
   const [name, setName] = useState(signupData.memberName || "");
   const [phone, setPhone] = useState(signupData.memberPhone || "");
@@ -117,7 +132,8 @@ export default function DetailsPage() {
   };
 
   const handleNext = async () => {
-    if (!isSignupDataComplete()) {
+    console.log("handleNext");
+    if (!isDetailsDataComplete()) {
       return;
     }
 

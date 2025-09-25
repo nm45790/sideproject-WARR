@@ -49,6 +49,9 @@ export const authService = {
         tokenManager.setAccessToken(response.data.data.accessToken);
         tokenManager.setRefreshToken(response.data.data.refreshToken);
 
+        // 사용자 정보 저장
+        tokenManager.setUserInfo(response.data.data);
+
         return {
           success: true,
           data: response.data,
@@ -177,5 +180,39 @@ export const authService = {
       console.error("토큰 유효성 검사 실패:", error);
       return false;
     }
+  },
+
+  /**
+   * 현재 사용자 정보 조회 (쿠키에서)
+   */
+  getCurrentUserInfo(): LoginResponse["data"] | null {
+    return tokenManager.getUserInfo();
+  },
+
+  /**
+   * 사용자 정보 업데이트
+   */
+  updateUserInfo(userInfo: Partial<LoginResponse["data"]>): void {
+    const currentUserInfo = tokenManager.getUserInfo();
+    if (currentUserInfo) {
+      const updatedUserInfo = { ...currentUserInfo, ...userInfo };
+      tokenManager.setUserInfo(updatedUserInfo);
+    }
+  },
+
+  /**
+   * 사용자 역할 확인
+   */
+  getUserRole(): string | null {
+    const userInfo = tokenManager.getUserInfo();
+    return userInfo?.role || null;
+  },
+
+  /**
+   * 사용자 ID 조회
+   */
+  getUserId(): number | null {
+    const userInfo = tokenManager.getUserInfo();
+    return userInfo?.id || null;
   },
 };

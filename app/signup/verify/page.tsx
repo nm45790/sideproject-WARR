@@ -11,6 +11,21 @@ export default function VerifyPage() {
   const router = useRouter();
   const { signupData } = useSignupStore();
 
+  // 필수 약관 동의 체크
+  useEffect(() => {
+    const requiredTerms = [
+      signupData.termsSelectOption.service,
+      signupData.termsSelectOption.privacy,
+      signupData.termsSelectOption.thirdParty,
+      signupData.termsSelectOption.payment,
+    ];
+
+    if (!requiredTerms.every(Boolean)) {
+      alert("잘못된 접근입니다.");
+      router.push("/signup/terms");
+    }
+  }, [router, signupData.termsSelectOption]);
+
   const [verificationCode, setVerificationCode] = useState("");
   const [isCodeFocused, setIsCodeFocused] = useState(false);
   const [isLoading, setIsLoading] = useState(false);

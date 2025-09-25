@@ -116,7 +116,7 @@ export default function TermsPage() {
   const allAgreed = Object.values(signupData.termsSelectOption).every(Boolean);
 
   const handleGoBack = () => {
-    router.back();
+    router.replace("/");
   };
 
   const handleAllAgreeToggle = () => {

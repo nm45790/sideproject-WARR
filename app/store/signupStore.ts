@@ -35,6 +35,7 @@ interface SignupStore {
   // 유틸리티
   isAllRequiredTermsAgreed: () => boolean;
   isSignupDataComplete: () => boolean;
+  isDetailsDataComplete: () => boolean;
 }
 
 const initialSignupData: SignupData = {
@@ -52,111 +53,113 @@ const initialSignupData: SignupData = {
   },
 };
 
-export const useSignupStore = create<SignupStore>()(
-  persist(
-    (set, get) => ({
-      // 초기 상태
+export const useSignupStore = create<SignupStore>()((set, get) => ({
+  // 초기 상태
+  signupData: initialSignupData,
+
+  // 회원 ID 업데이트
+  updateMemberId: (memberId) =>
+    set((state) => ({
+      signupData: {
+        ...state.signupData,
+        memberId,
+      },
+    })),
+
+  // 회원 비밀번호 업데이트
+  updateMemberPassword: (memberPassword) =>
+    set((state) => ({
+      signupData: {
+        ...state.signupData,
+        memberPassword,
+      },
+    })),
+
+  // 회원 전화번호 업데이트
+  updateMemberPhone: (memberPhone) =>
+    set((state) => ({
+      signupData: {
+        ...state.signupData,
+        memberPhone,
+      },
+    })),
+
+  // 회원 이름 업데이트
+  updateMemberName: (memberName) =>
+    set((state) => ({
+      signupData: {
+        ...state.signupData,
+        memberName,
+      },
+    })),
+
+  // 회원 이메일 업데이트
+  updateMemberEmail: (memberEmail) =>
+    set((state) => ({
+      signupData: {
+        ...state.signupData,
+        memberEmail,
+      },
+    })),
+
+  // 약관 동의 업데이트
+  updateTermsSelectOption: (terms) =>
+    set((state) => ({
+      signupData: {
+        ...state.signupData,
+        termsSelectOption: {
+          ...state.signupData.termsSelectOption,
+          ...terms,
+        },
+      },
+    })),
+
+  // 전체 데이터 업데이트
+  updateSignupData: (data) =>
+    set((state) => ({
+      signupData: {
+        ...state.signupData,
+        ...data,
+      },
+    })),
+
+  // 데이터 초기화
+  resetSignupData: () =>
+    set({
       signupData: initialSignupData,
-
-      // 회원 ID 업데이트
-      updateMemberId: (memberId) =>
-        set((state) => ({
-          signupData: {
-            ...state.signupData,
-            memberId,
-          },
-        })),
-
-      // 회원 비밀번호 업데이트
-      updateMemberPassword: (memberPassword) =>
-        set((state) => ({
-          signupData: {
-            ...state.signupData,
-            memberPassword,
-          },
-        })),
-
-      // 회원 전화번호 업데이트
-      updateMemberPhone: (memberPhone) =>
-        set((state) => ({
-          signupData: {
-            ...state.signupData,
-            memberPhone,
-          },
-        })),
-
-      // 회원 이름 업데이트
-      updateMemberName: (memberName) =>
-        set((state) => ({
-          signupData: {
-            ...state.signupData,
-            memberName,
-          },
-        })),
-
-      // 회원 이메일 업데이트
-      updateMemberEmail: (memberEmail) =>
-        set((state) => ({
-          signupData: {
-            ...state.signupData,
-            memberEmail,
-          },
-        })),
-
-      // 약관 동의 업데이트
-      updateTermsSelectOption: (terms) =>
-        set((state) => ({
-          signupData: {
-            ...state.signupData,
-            termsSelectOption: {
-              ...state.signupData.termsSelectOption,
-              ...terms,
-            },
-          },
-        })),
-
-      // 전체 데이터 업데이트
-      updateSignupData: (data) =>
-        set((state) => ({
-          signupData: {
-            ...state.signupData,
-            ...data,
-          },
-        })),
-
-      // 데이터 초기화
-      resetSignupData: () =>
-        set({
-          signupData: initialSignupData,
-        }),
-
-      // 필수 약관 모두 동의했는지 확인
-      isAllRequiredTermsAgreed: () => {
-        const { termsSelectOption } = get().signupData;
-        return (
-          termsSelectOption.service &&
-          termsSelectOption.privacy &&
-          termsSelectOption.thirdParty &&
-          termsSelectOption.payment
-        );
-      },
-
-      // 회원가입 데이터가 완성되었는지 확인
-      isSignupDataComplete: () => {
-        const { signupData } = get();
-        return (
-          get().isAllRequiredTermsAgreed() &&
-          signupData.memberName?.trim() !== "" &&
-          signupData.memberPhone?.trim() !== "" &&
-          signupData.memberEmail?.trim() !== "" &&
-          signupData.memberId?.trim() !== "" &&
-          signupData.memberPassword?.trim() !== ""
-        );
-      },
     }),
-    {
-      name: "signup-store", // localStorage 키
-      partialize: (state) => ({ signupData: state.signupData }), // 저장할 데이터 선택
-    },
-  ),
-);
+
+  // 필수 약관 모두 동의했는지 확인
+  isAllRequiredTermsAgreed: () => {
+    const { termsSelectOption } = get().signupData;
+    return (
+      termsSelectOption.service &&
+      termsSelectOption.privacy &&
+      termsSelectOption.thirdParty &&
+      termsSelectOption.payment
+    );
+  },
+
+  // 회원가입 데이터가 완성되었는지 확인
+  isSignupDataComplete: () => {
+    const { signupData } = get();
+    return (
+      get().isAllRequiredTermsAgreed() &&
+      signupData.memberName?.trim() !== "" &&
+      signupData.memberPhone?.trim() !== "" &&
+      signupData.memberEmail?.trim() !== "" &&
+      signupData.memberId?.trim() !== "" &&
+      signupData.memberPassword?.trim() !== ""
+    );
+  },
+
+  // 상세 데이터가 완성되었는지 확인
+  isDetailsDataComplete: () => {
+    const { signupData } = get();
+    return (
+      signupData.memberName?.trim() !== "" &&
+      signupData.memberPhone?.trim() !== "" &&
+      signupData.memberEmail?.trim() !== ""
+    );
+  },
+}));

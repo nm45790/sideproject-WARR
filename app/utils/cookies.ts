@@ -109,6 +109,7 @@ export const cookies = {
 export const tokenManager = {
   ACCESS_TOKEN_KEY: "access_token",
   REFRESH_TOKEN_KEY: "refresh_token",
+  USER_INFO_KEY: "user_info",
 
   /**
    * 액세스 토큰 저장 (쿠키로 저장 - SSE 호환성, JS 읽기 가능)
@@ -150,7 +151,35 @@ export const tokenManager = {
   },
 
   /**
-   * 모든 토큰 삭제
+   * 사용자 정보 저장
+   */
+  setUserInfo(userInfo: any): void {
+    cookies.set(this.USER_INFO_KEY, JSON.stringify(userInfo), {
+      maxAge: 7 * 24 * 60 * 60, // 7일
+      path: "/",
+      secure: process.env.NODE_ENV === "production",
+      httpOnly: false,
+      sameSite: "lax",
+    });
+  },
+
+  /**
+   * 사용자 정보 조회
+   */
+  getUserInfo(): any | null {
+    const userInfoStr = cookies.get(this.USER_INFO_KEY);
+    if (!userInfoStr) return null;
+
+    try {
+      return JSON.parse(userInfoStr);
+    } catch (error) {
+      console.error("사용자 정보 파싱 오류:", error);
+      return null;
+    }
+  },
+
+  /**
+   * 모든 토큰 및 사용자 정보 삭제
    */
   clearTokens(): void {
     // 액세스 토큰 삭제 (쿠키)
@@ -158,6 +187,9 @@ export const tokenManager = {
 
     // 리프레시 토큰 삭제 (쿠키)
     cookies.remove(this.REFRESH_TOKEN_KEY, { path: "/" });
+
+    // 사용자 정보 삭제
+    cookies.remove(this.USER_INFO_KEY, { path: "/" });
   },
 
   /**

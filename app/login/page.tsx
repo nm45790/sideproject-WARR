@@ -40,7 +40,10 @@ export default function LoginPage() {
       });
 
       if (result.success) {
-        // 로그인 성공
+        // 로그인 성공 - 사용자 정보는 이미 쿠키에 저장됨
+        const userInfo = authService.getCurrentUserInfo();
+        console.log("로그인된 사용자 정보:", userInfo);
+
         if (result.data?.data.role === "USER") {
           router.push("/guardian");
         } else if (result.data?.data.role === "ACADEMY") {
