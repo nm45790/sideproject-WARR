@@ -25,6 +25,7 @@ export default function AccountPage() {
     useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [passwordError, setPasswordError] = useState("");
+  const [showPasswordGuide, setShowPasswordGuide] = useState(false);
 
   // 디바운스 API 훅 사용
   const api = useDebouncedApi();
@@ -55,6 +56,10 @@ export default function AccountPage() {
   const handleConfirmPasswordChange = (value: string) => {
     setConfirmPassword(value);
     setPasswordError("");
+  };
+
+  const handlePasswordGuideToggle = () => {
+    setShowPasswordGuide(!showPasswordGuide);
   };
 
   const handleNext = async () => {
@@ -198,6 +203,16 @@ export default function AccountPage() {
               </p>
             </div>
           )}
+
+          {/* 비밀번호 설정 안내 버튼 */}
+          <div className="mt-3 flex justify-end">
+            <button
+              onClick={handlePasswordGuideToggle}
+              className="flex items-center text-[14px] font-normal text-[#b4b4b4] underline"
+            >
+              비밀번호 설정 안내
+            </button>
+          </div>
         </div>
 
         {/* 회원가입 완료 버튼 */}
@@ -215,6 +230,81 @@ export default function AccountPage() {
           </span>
         </button>
       </div>
+
+      {/* 비밀번호 설정 안내 모달 */}
+      {showPasswordGuide && (
+        <div className="fixed inset-0 z-[9999] flex items-end">
+          {/* 백드롭 */}
+          <div
+            className="absolute inset-0 bg-black/40"
+            onClick={handlePasswordGuideToggle}
+          />
+
+          {/* 모달 컨텐츠 */}
+          <div className="relative bg-white rounded-t-[20px] w-full h-[414px] animate-slide-up z-[10000]">
+            {/* 제목 */}
+            <div className="flex items-center px-5 py-6">
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 20 20"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                className="w-5 h-5 mr-2"
+              >
+                <path
+                  d="M15 7H14V5C14 2.23858 11.7614 0 9 0C6.23858 0 4 2.23858 4 5V7H3C2.44772 7 2 7.44772 2 8V17C2 17.5523 2.44772 18 3 18H15C15.5523 18 16 17.5523 16 17V8C16 7.44772 15.5523 7 15 7ZM6 5C6 3.34315 7.34315 2 9 2C10.6569 2 12 3.34315 12 5V7H6V5ZM15 16H3V9H15V16Z"
+                  fill="#005ab4"
+                />
+              </svg>
+              <h3 className="text-[15px] font-bold text-[#005ab4]">
+                비밀번호 설정 시 유의사항
+              </h3>
+            </div>
+
+            {/* 구분선 */}
+            <div className="mx-5 h-px bg-[#d2d2d2]"></div>
+
+            {/* 안내 내용 */}
+            <div className="px-3 py-6">
+              <ul className="space-y-4 text-[16px] font-medium text-[#363e4a]">
+                <li className="flex items-start">
+                  <div className="w-1.5 h-1.5 bg-[#363e4a] rounded-full mt-2 mr-3 flex-shrink-0"></div>
+                  <span>
+                    비밀번호는 8 ~ 32자의 영문 대소문자, 숫자, 특수문자를
+                    포함하여 설정해 주세요.
+                  </span>
+                </li>
+                <li className="flex items-start">
+                  <div className="w-1.5 h-1.5 bg-[#363e4a] rounded-full mt-2 mr-3 flex-shrink-0"></div>
+                  <span>
+                    다른 사이트에서 사용하는 것과 동일하거나 쉬운 비밀번호는
+                    사용하지 마세요.
+                  </span>
+                </li>
+                <li className="flex items-start">
+                  <div className="w-1.5 h-1.5 bg-[#363e4a] rounded-full mt-2 mr-3 flex-shrink-0"></div>
+                  <span>
+                    안전한 계정 사용을 위해 비밀번호는 주기적으로 변경해주세요.
+                  </span>
+                </li>
+              </ul>
+            </div>
+
+            {/* 확인 버튼 */}
+            <div className="absolute bottom-0 left-0 right-0">
+              <button
+                onClick={handlePasswordGuideToggle}
+                className="w-full h-[59px] bg-[#3f55ff] flex items-center justify-center"
+              >
+                <span className="text-[16px] font-semibold text-white">
+                  확인
+                </span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </MainContainer>
   );
 }

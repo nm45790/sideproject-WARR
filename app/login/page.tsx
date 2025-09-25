@@ -40,11 +40,13 @@ export default function LoginPage() {
       });
 
       if (result.success) {
-        // 로그인 성공 - 메인 페이지로 이동
+        // 로그인 성공
         if (result.data?.data.role === "USER") {
           router.push("/guardian");
         } else if (result.data?.data.role === "ACADEMY") {
           router.push("/academy");
+        } else if (result.data?.data.role === "TEMP") {
+          router.push("/signup/role");
         }
       } else {
         setError(result.error || "로그인에 실패했습니다.");
