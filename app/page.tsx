@@ -4,10 +4,12 @@ import { useEffect, useState } from "react";
 import MainContainer from "./components/MainContainer";
 import Splash from "./components/Splash";
 import { useRouter } from "next/navigation";
+import { authService } from "./utils/auth";
 
 export default function Home() {
   const router = useRouter();
   const isProduction = process.env.NODE_ENV === "production";
+  const userInfo = authService.getCurrentUserInfo();
 
   const [splashFading, setSplashFading] = useState(isProduction ? false : true);
   const [mainVisible, setMainVisible] = useState(isProduction ? false : true);
@@ -28,6 +30,19 @@ export default function Home() {
       };
     }
   }, [isProduction]);
+
+  // 로그인 상태 체크
+  useEffect(() => {
+    if (userInfo) {
+      if (userInfo.role === "ACADEMY") {
+        if (!userInfo.academyId) {
+          router.push("/signup/academy");
+        } else {
+          router.push("/academy");
+        }
+      }
+    }
+  }, []);
 
   return (
     <>

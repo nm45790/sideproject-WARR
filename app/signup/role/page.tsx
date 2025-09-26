@@ -20,22 +20,13 @@ export default function RolePage() {
 
   // 필수 약관 동의 체크
   useEffect(() => {
-    const requiredTerms = [
-      signupData.termsSelectOption.service,
-      signupData.termsSelectOption.privacy,
-      signupData.termsSelectOption.thirdParty,
-      signupData.termsSelectOption.payment,
-    ];
-
     // 접근권한 체크(TEMP인 경우만 접근 가능)
     if (!userInfo) {
       alert("잘못된 접근입니다.");
       router.push("/");
-    } else {
-      if (userInfo.role !== "TEMP" && !requiredTerms.every(Boolean)) {
-        alert("잘못된 접근입니다.");
-        router.push("/signup/terms");
-      }
+    } else if (userInfo.role !== "TEMP") {
+      alert("잘못된 접근입니다.");
+      router.push("/");
     }
   }, [router, signupData.termsSelectOption, userInfo]);
 

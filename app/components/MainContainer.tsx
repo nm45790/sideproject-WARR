@@ -1,3 +1,5 @@
+import { authService } from "../utils/auth";
+
 export const MainContainer = ({
   children,
   className,
@@ -5,6 +7,9 @@ export const MainContainer = ({
   children: React.ReactNode;
   className?: string;
 }) => {
+  const userInfo = authService.getCurrentUserInfo();
+
+  console.log(userInfo);
   return (
     <div className="w-full flex justify-center bg-gray-300">
       <div
