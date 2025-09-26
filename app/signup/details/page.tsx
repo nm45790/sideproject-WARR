@@ -145,6 +145,23 @@ export default function DetailsPage() {
     setIsLoading(true);
 
     try {
+      // 중복 체크 먼저 실행
+      const checkResult = await api.execute({
+        url: "/api/v1/members/check-unique",
+        method: "POST",
+        data: {
+          name: signupData.memberName,
+          email: signupData.memberEmail,
+          phone: signupData.memberPhone,
+        },
+      });
+
+      if (!checkResult.success) {
+        alert("이미 가입된 정보가 있습니다.");
+        return;
+      }
+
+      // 중복 체크 통과 후 인증번호 발송
       await api.execute({
         url: "/api/v1/phone-verification/send-code",
         method: "POST",
