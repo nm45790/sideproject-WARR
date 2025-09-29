@@ -112,7 +112,17 @@ class ApiClient {
 
     // 인증이 필요한 경우 토큰 추가
     if (requireAuth) {
-      const accessToken = tokenManager.getAccessToken();
+      let accessToken = tokenManager.getAccessToken();
+
+      // accessToken이 없으면 refreshToken으로 갱신 시도
+      if (!accessToken) {
+        console.log("🔄 AccessToken이 없어서 refreshToken으로 갱신 시도");
+        const refreshSuccess = await this.refreshToken();
+        if (refreshSuccess) {
+          accessToken = tokenManager.getAccessToken();
+        }
+      }
+
       if (accessToken) {
         requestHeaders["Authorization"] = `Bearer ${accessToken}`;
       }
