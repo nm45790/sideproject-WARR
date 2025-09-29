@@ -2,141 +2,228 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import MainContainer from "../../../components/MainContainer";
-import Icons from "../../../components/Icons";
-import { useSignupStore } from "../../../store/signupStore";
 import { authService } from "../../../utils/auth";
-import { api } from "../../../utils/api";
 
-export default function AcademyPage() {
+// Figma에서 가져온 이미지 상수들
+const imgBtnBack =
+  "http://localhost:3845/assets/8c5e1938113884a664d4f7d25b382eea88451cd5.svg";
+
+interface OnboardingSlide {
+  id: number;
+  title: string;
+  description: string;
+  image: string;
+}
+
+const onboardingSlides: OnboardingSlide[] = [
+  {
+    id: 1,
+    title: "휴대폰 하나로\n우리 아이들을 모두 관리!",
+    description: "등원부터 상황 관리까지 간편하게 처리할 수 있어요!",
+    image: "/images/onboarding-1.png",
+  },
+  {
+    id: 2,
+    title: "간편한 등원/하원 관리",
+    description: "학부모와의 소통을 통해\n반려견의 일상을 안전하게 관리하세요",
+    image: "/images/onboarding-2.png",
+  },
+  {
+    id: 3,
+    title: "체계적인 일정 관리",
+    description: "수업, 급식, 산책 등\n모든 일정을 한눈에 확인하세요",
+    image: "/images/onboarding-3.png",
+  },
+  {
+    id: 4,
+    title: "학부모와의 소통",
+    description: "실시간 알림과 사진 공유로\n학부모와의 신뢰를 쌓아가세요",
+    image: "/images/onboarding-4.png",
+  },
+];
+
+export default function AcademyOnboardingPage() {
   const router = useRouter();
-  const { signupData } = useSignupStore();
-  const [selectedRole, setSelectedRole] = useState<"PARENT" | "ACADEMY" | null>(
-    null,
-  );
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [startX, setStartX] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
 
   const userInfo = authService.getCurrentUserInfo();
 
-  // 필수 약관 동의 체크
+  // 접근권한 체크
   useEffect(() => {
-    // 접근권한 체크(TEMP인 경우만 접근 가능)
-    if (!userInfo) {
-      alert("잘못된 접근입니다.");
-      router.push("/");
-    } else if (userInfo.role !== "ACADEMY") {
+    if (!userInfo || userInfo.role !== "ACADEMY") {
       alert("잘못된 접근입니다.");
       router.push("/");
     }
   }, [router, userInfo]);
 
-  const handleGoBack = () => {
-    router.back();
-  };
-
-  const handleSelect = async (role: "PARENT" | "ACADEMY") => {
-    if (isSubmitting) return;
-    setSelectedRole(role);
-    setIsSubmitting(true);
-
-    try {
-      const res = await api.post(
-        "/api/v1/members/step2",
-        { role },
-        { requireAuth: true },
-      );
-
-      if (!res.success) throw new Error(res.error || "역할 설정 실패");
-
-      authService.updateUserInfo({ role });
-
-      if (role === "PARENT") {
-        router.push("/signup/parent");
-      } else {
-        router.push("/signup/academy/onboarding");
-      }
-    } catch (e) {
-      alert(e instanceof Error ? e.message : "역할 설정에 실패했습니다.");
-      setSelectedRole(null);
-    } finally {
-      setIsSubmitting(false);
+  const handleNext = () => {
+    if (currentSlide < onboardingSlides.length - 1) {
+      setCurrentSlide(currentSlide + 1);
+    } else {
+      // 마지막 슬라이드에서 다음 버튼 클릭 시 info 페이지로 이동
+      router.push("/signup/academy/info");
     }
   };
 
+  const handleBack = () => {
+    router.back();
+  };
+
+  const handleDotClick = (index: number) => {
+    setCurrentSlide(index);
+  };
+
+  // 터치/마우스 이벤트 핸들러
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setStartX(e.touches[0].clientX);
+    setIsDragging(true);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!isDragging) return;
+    // preventDefault 제거 - passive 이벤트 리스너에서 에러 발생 방지
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (!isDragging) return;
+    setIsDragging(false);
+
+    const endX = e.changedTouches[0].clientX;
+    const diff = startX - endX;
+    const threshold = 50;
+
+    if (Math.abs(diff) > threshold) {
+      if (diff > 0 && currentSlide < onboardingSlides.length - 1) {
+        // 왼쪽으로 스와이프 - 다음 슬라이드
+        setCurrentSlide(currentSlide + 1);
+      } else if (diff < 0 && currentSlide > 0) {
+        // 오른쪽으로 스와이프 - 이전 슬라이드
+        setCurrentSlide(currentSlide - 1);
+      }
+    }
+  };
+
+  // 마우스 이벤트 핸들러
+  const handleMouseDown = (e: React.MouseEvent) => {
+    setStartX(e.clientX);
+    setIsDragging(true);
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging) return;
+    // preventDefault 제거 - passive 이벤트 리스너에서 에러 발생 방지
+  };
+
+  const handleMouseUp = (e: React.MouseEvent) => {
+    if (!isDragging) return;
+    setIsDragging(false);
+
+    const endX = e.clientX;
+    const diff = startX - endX;
+    const threshold = 50;
+
+    if (Math.abs(diff) > threshold) {
+      if (diff > 0 && currentSlide < onboardingSlides.length - 1) {
+        // 왼쪽으로 스와이프 - 다음 슬라이드
+        setCurrentSlide(currentSlide + 1);
+      } else if (diff < 0 && currentSlide > 0) {
+        // 오른쪽으로 스와이프 - 이전 슬라이드
+        setCurrentSlide(currentSlide - 1);
+      }
+    }
+  };
+
+  const currentSlideData = onboardingSlides[currentSlide];
+  const isLastSlide = currentSlide === onboardingSlides.length - 1;
+
   return (
-    <MainContainer>
-      {/* 헤더 */}
-      <div className="flex items-start pt-[45px] pb-[20px]">
-        <button
-          onClick={handleGoBack}
-          className="p-[18px] w-[57px] h-[57px] flex items-center justify-center -ml-[18px]"
-        >
-          <Icons.ArrowLeft className="w-[24px] h-[24px] text-[#363e4a]" />
+    <div className="bg-white w-full h-screen overflow-hidden flex flex-col">
+      {/* 헤더 영역 */}
+      <div className="flex items-center justify-between px-5 pt-[45px] pb-5">
+        <button onClick={handleBack} className="w-[26px] h-[22px]">
+          <img
+            alt="뒤로가기"
+            className="block max-w-none size-full"
+            src={imgBtnBack}
+          />
         </button>
-      </div>
 
-      {/* 타이틀 */}
-      <div className="pt-[32px] pb-[28px]">
-        <h1 className="text-[25px] font-bold text-[#363e4a] leading-[30px] mb-2">
-          당신은 어떤 사용자이신가요?
-        </h1>
-        <p className="text-[16px] text-[#858585]">
-          보호자의 유형을 선택해 주세요
-        </p>
-      </div>
-
-      {/* 옵션 카드들 */}
-      <div className="flex flex-col gap-3">
-        <button
-          onClick={() => handleSelect("PARENT")}
-          className={`w-full bg-white rounded-[10px] border transition-all text-left shadow-[0_1px_3px_0_rgba(0,0,0,0.1)] px-5 py-4 flex items-center justify-between ${
-            selectedRole === "PARENT" ? "border-[#3f55ff]" : "border-[#f2f2f2]"
-          }`}
-        >
-          <div>
-            <p className="text-[20px] font-bold text-black">보호자</p>
-            <p className="text-[13px] text-[#858585] mt-1">
-              반려견을 키우고 있어요
-            </p>
-          </div>
-          <div
-            className={`w-5 h-5 rounded-full border flex items-center justify-center transition-all duration-300 ${
-              selectedRole === "PARENT"
-                ? "bg-[#3f55ff] border-[#3f55ff] scale-110 animate-pop"
-                : "border-[#e5e5e5]"
-            }`}
-          >
-            <span
-              className={`w-2 h-2 rounded-full transition-all duration-300 ${selectedRole === "PARENT" ? "bg-white scale-100" : "bg-transparent scale-0"}`}
+        {/* 페이지 인디케이터 - 상단 중앙 */}
+        <div className="flex gap-2">
+          {onboardingSlides.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => handleDotClick(index)}
+              className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                index === currentSlide
+                  ? "bg-[#3f55ff] w-6"
+                  : "bg-[#e5e5e5] hover:bg-[#d0d0d0]"
+              }`}
             />
-          </div>
-        </button>
+          ))}
+        </div>
 
-        <button
-          onClick={() => handleSelect("ACADEMY")}
-          className={`w-full bg-white rounded-[10px] border transition-all text-left shadow-[0_1px_3px_0_rgba(0,0,0,0.1)] px-5 py-4 flex items-center justify-between ${
-            selectedRole === "ACADEMY" ? "border-[#3f55ff]" : "border-[#f2f2f2]"
-          }`}
-        >
-          <div>
-            <p className="text-[20px] font-bold text-black">유치원</p>
-            <p className="text-[13px] text-[#858585] mt-1">
-              반려견 유치원을 운영하고 있어요
-            </p>
-          </div>
+        {/* 빈 공간 (균형 맞추기) */}
+        <div className="w-[26px]"></div>
+      </div>
+
+      {/* 스와이프 가능한 컨테이너 */}
+      <div
+        className="flex-1 flex transition-transform duration-300 ease-out"
+        style={{ transform: `translateX(-${currentSlide * 100}%)` }}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+      >
+        {onboardingSlides.map((slide, index) => (
           <div
-            className={`w-5 h-5 rounded-full border flex items-center justify-center transition-all duration-300 ${
-              selectedRole === "ACADEMY"
-                ? "bg-[#3f55ff] border-[#3f55ff] scale-110 animate-pop"
-                : "border-[#e5e5e5]"
-            }`}
+            key={slide.id}
+            className="w-full h-full flex-shrink-0 flex flex-col"
           >
-            <span
-              className={`w-2 h-2 rounded-full transition-all duration-300 ${selectedRole === "ACADEMY" ? "bg-white scale-100" : "bg-transparent scale-0"}`}
-            />
+            {/* 이미지 영역 */}
+            <div className="flex-1 flex items-center justify-center px-5">
+              <div className="w-full max-w-[300px] h-[300px] flex items-center justify-center">
+                <div className="w-full h-full bg-gray-100 rounded-[20px] flex items-center justify-center">
+                  {/* 실제 이미지가 있으면 여기에 표시 */}
+                  <div className="text-[#858585] text-[16px] text-center">
+                    {slide.image}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* 텍스트 영역 */}
+            <div className="px-7 pb-8 text-center">
+              <h1
+                className="font-bold text-[#363e4a] text-[25px] leading-[30px] mb-4"
+                style={{ whiteSpace: "pre-line" }}
+              >
+                {slide.title}
+              </h1>
+              <p className="font-medium text-[#858585] text-[16px] leading-[24px]">
+                {slide.description}
+              </p>
+            </div>
           </div>
+        ))}
+      </div>
+
+      {/* 다음 버튼 */}
+      <div className="px-5 pb-8">
+        <button
+          onClick={handleNext}
+          className="w-full h-[59px] bg-[#3f55ff] rounded-[7px] flex items-center justify-center"
+        >
+          <p className="font-semibold text-white text-[16px]">
+            {isLastSlide ? "시작하기" : "다음"}
+          </p>
         </button>
       </div>
-    </MainContainer>
+    </div>
   );
 }

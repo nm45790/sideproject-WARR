@@ -9,6 +9,13 @@ export interface TermsSelectOption {
   marketing: boolean;
 }
 
+export interface ScheduleItem {
+  dayOfWeek: string;
+  isOpen: boolean;
+  operatingStartTime: string;
+  operatingEndTime: string;
+}
+
 export interface SignupData {
   memberId: string;
   memberPassword: string;
@@ -16,6 +23,14 @@ export interface SignupData {
   memberName: string;
   memberEmail: string;
   termsSelectOption: TermsSelectOption;
+  // Academy signup data
+  academyName: string;
+  academyAddress: string;
+  academyAddressDetail: string;
+  sggCode: string;
+  academyPhone: string;
+  maxCapacity: number;
+  scheduleList: ScheduleItem[];
 }
 
 interface SignupStore {
@@ -31,6 +46,15 @@ interface SignupStore {
   updateTermsSelectOption: (terms: Partial<TermsSelectOption>) => void;
   updateSignupData: (data: Partial<SignupData>) => void;
   resetSignupData: () => void;
+
+  // Academy signup actions
+  updateAcademyName: (academyName: string) => void;
+  updateAcademyAddress: (academyAddress: string) => void;
+  updateAcademyAddressDetail: (academyAddressDetail: string) => void;
+  updateSggCode: (sggCode: string) => void;
+  updateAcademyPhone: (academyPhone: string) => void;
+  updateMaxCapacity: (maxCapacity: number) => void;
+  updateScheduleList: (scheduleList: ScheduleItem[]) => void;
 
   // 유틸리티
   isAllRequiredTermsAgreed: () => boolean;
@@ -51,6 +75,14 @@ const initialSignupData: SignupData = {
     payment: false,
     marketing: false,
   },
+  // Academy signup data
+  academyName: "",
+  academyAddress: "",
+  academyAddressDetail: "",
+  sggCode: "",
+  academyPhone: "",
+  maxCapacity: 0,
+  scheduleList: [],
 };
 
 export const useSignupStore = create<SignupStore>()((set, get) => ({
@@ -128,6 +160,63 @@ export const useSignupStore = create<SignupStore>()((set, get) => ({
     set({
       signupData: initialSignupData,
     }),
+
+  // Academy signup actions
+  updateAcademyName: (academyName) =>
+    set((state) => ({
+      signupData: {
+        ...state.signupData,
+        academyName,
+      },
+    })),
+
+  updateAcademyAddress: (academyAddress) =>
+    set((state) => ({
+      signupData: {
+        ...state.signupData,
+        academyAddress,
+      },
+    })),
+
+  updateAcademyAddressDetail: (academyAddressDetail) =>
+    set((state) => ({
+      signupData: {
+        ...state.signupData,
+        academyAddressDetail,
+      },
+    })),
+
+  updateSggCode: (sggCode) =>
+    set((state) => ({
+      signupData: {
+        ...state.signupData,
+        sggCode,
+      },
+    })),
+
+  updateAcademyPhone: (academyPhone) =>
+    set((state) => ({
+      signupData: {
+        ...state.signupData,
+        academyPhone,
+      },
+    })),
+
+  updateMaxCapacity: (maxCapacity) =>
+    set((state) => ({
+      signupData: {
+        ...state.signupData,
+        maxCapacity,
+      },
+    })),
+
+  updateScheduleList: (scheduleList) =>
+    set((state) => ({
+      signupData: {
+        ...state.signupData,
+        scheduleList,
+      },
+    })),
 
   // 필수 약관 모두 동의했는지 확인
   isAllRequiredTermsAgreed: () => {
