@@ -36,7 +36,7 @@ export default function Home() {
     if (userInfo) {
       if (userInfo.role === "ACADEMY") {
         if (!userInfo.academyId) {
-          router.push("/signup/academy");
+          router.push("/signup/academy/onboarding");
         } else {
           router.push("/academy");
         }

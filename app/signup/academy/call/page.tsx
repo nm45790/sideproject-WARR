@@ -2,11 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import MainContainer from "../../components/MainContainer";
-import Icons from "../../components/Icons";
-import { useSignupStore } from "../../store/signupStore";
-import { authService } from "../../utils/auth";
-import { api } from "../../utils/api";
+import MainContainer from "../../../components/MainContainer";
+import Icons from "../../../components/Icons";
+import { useSignupStore } from "../../../store/signupStore";
+import { authService } from "../../../utils/auth";
+import { api } from "../../../utils/api";
 
 export default function AcademyPage() {
   const router = useRouter();
@@ -53,7 +53,7 @@ export default function AcademyPage() {
       if (role === "PARENT") {
         router.push("/signup/parent");
       } else {
-        router.push("/signup/academy");
+        router.push("/signup/academy/onboarding");
       }
     } catch (e) {
       alert(e instanceof Error ? e.message : "역할 설정에 실패했습니다.");

@@ -2,13 +2,13 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import MainContainer from "../../components/MainContainer";
-import Icons from "../../components/Icons";
-import { useSignupStore } from "../../store/signupStore";
-import { authService } from "../../utils/auth";
-import { api } from "../../utils/api";
+import MainContainer from "../../../components/MainContainer";
+import Icons from "../../../components/Icons";
+import { useSignupStore } from "../../../store/signupStore";
+import { authService } from "../../../utils/auth";
+import { api } from "../../../utils/api";
 
-export default function RolePage() {
+export default function AcademyPage() {
   const router = useRouter();
   const { signupData } = useSignupStore();
   const [selectedRole, setSelectedRole] = useState<"PARENT" | "ACADEMY" | null>(
@@ -24,11 +24,11 @@ export default function RolePage() {
     if (!userInfo) {
       alert("잘못된 접근입니다.");
       router.push("/");
-    } else if (userInfo.role !== "TEMP") {
+    } else if (userInfo.role !== "ACADEMY") {
       alert("잘못된 접근입니다.");
       router.push("/");
     }
-  }, [router, signupData.termsSelectOption, userInfo]);
+  }, [router, userInfo]);
 
   const handleGoBack = () => {
     router.back();
