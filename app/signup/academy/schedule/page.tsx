@@ -122,20 +122,6 @@ export default function AcademySchedulePage() {
     router.push("/signup/academy/capacity");
   };
 
-  const formatTimeDisplay = (time: string) => {
-    const [hour, minute] = time.split(":");
-    const hourNum = parseInt(hour);
-    const displayHour =
-      hourNum === 0 ? 12 : hourNum > 12 ? hourNum - 12 : hourNum;
-    const period = hourNum < 12 ? "오전" : "오후";
-    return `${period} ${displayHour}시`;
-  };
-
-  const formatMinuteDisplay = (time: string) => {
-    const [, minute] = time.split(":");
-    return `${minute}분`;
-  };
-
   return (
     <MainContainer>
       {/* 헤더 영역 - 뒤로가기 */}
