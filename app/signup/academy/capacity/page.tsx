@@ -12,9 +12,7 @@ export default function AcademyCapacityPage() {
   const { signupData, updateMaxCapacity, isAcademyOnboardingCompleted } =
     useSignupStore();
 
-  const [capacity, setCapacity] = useState(
-    signupData.maxCapacity?.toString() || "",
-  );
+  const [capacity, setCapacity] = useState("");
   const [isCapacityFocused, setIsCapacityFocused] = useState(false);
 
   const userInfo = authService.getCurrentUserInfo();
@@ -34,9 +32,11 @@ export default function AcademyCapacityPage() {
     }
   }, [router, userInfo, isAcademyOnboardingCompleted]);
 
-  // localStorage에서 저장된 값으로 초기값 설정
+  // signupStore에서 저장된 값으로 초기값 설정
   useEffect(() => {
-    setCapacity(signupData.maxCapacity?.toString() || "");
+    if (signupData.maxCapacity && signupData.maxCapacity > 0) {
+      setCapacity(signupData.maxCapacity.toString());
+    }
   }, [signupData]);
 
   const handleGoBack = () => {
@@ -52,7 +52,8 @@ export default function AcademyCapacityPage() {
   const handleCapacityChange = (value: string) => {
     const formatted = formatCapacity(value);
     setCapacity(formatted);
-    updateMaxCapacity(formatted ? parseInt(formatted) : 0);
+    // 빈 문자열이면 0으로, 아니면 숫자로 변환
+    updateMaxCapacity(formatted === "" ? 0 : parseInt(formatted));
   };
 
   const handleNext = () => {
@@ -64,7 +65,7 @@ export default function AcademyCapacityPage() {
     router.push("/signup/academy/picture");
   };
 
-  const isFormValid = capacity?.trim() !== "" && parseInt(capacity) > 0;
+  const isFormValid = capacity !== "" && parseInt(capacity) > 0;
 
   return (
     <MainContainer>
