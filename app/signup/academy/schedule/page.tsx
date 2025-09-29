@@ -16,7 +16,8 @@ interface ScheduleItem {
 
 export default function AcademySchedulePage() {
   const router = useRouter();
-  const { signupData, updateScheduleList } = useSignupStore();
+  const { signupData, updateScheduleList, isAcademyOnboardingCompleted } =
+    useSignupStore();
 
   const [schedules, setSchedules] = useState<ScheduleItem[]>([]);
 
@@ -67,8 +68,15 @@ export default function AcademySchedulePage() {
     if (!userInfo || userInfo.role !== "ACADEMY") {
       alert("잘못된 접근입니다.");
       router.push("/");
+      return;
     }
-  }, [router, userInfo]);
+
+    // 온보딩 완료 여부 체크
+    if (!isAcademyOnboardingCompleted()) {
+      alert("잘못된 접근입니다.");
+      router.push("/");
+    }
+  }, [router, userInfo, isAcademyOnboardingCompleted]);
 
   // 초기 스케줄 데이터 설정
   useEffect(() => {

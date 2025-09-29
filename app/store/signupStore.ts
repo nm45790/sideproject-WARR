@@ -31,6 +31,9 @@ export interface SignupData {
   academyPhone: string;
   maxCapacity: number;
   scheduleList: ScheduleItem[];
+  imageKey: string;
+  // Onboarding status
+  isAcademyOnboardingCompleted: boolean;
 }
 
 interface SignupStore {
@@ -55,11 +58,14 @@ interface SignupStore {
   updateAcademyPhone: (academyPhone: string) => void;
   updateMaxCapacity: (maxCapacity: number) => void;
   updateScheduleList: (scheduleList: ScheduleItem[]) => void;
+  updateImageKey: (imageKey: string) => void;
+  updateAcademyOnboardingCompleted: (completed: boolean) => void;
 
   // 유틸리티
   isAllRequiredTermsAgreed: () => boolean;
   isSignupDataComplete: () => boolean;
   isDetailsDataComplete: () => boolean;
+  isAcademyOnboardingCompleted: () => boolean;
 }
 
 const initialSignupData: SignupData = {
@@ -83,6 +89,8 @@ const initialSignupData: SignupData = {
   academyPhone: "",
   maxCapacity: 0,
   scheduleList: [],
+  imageKey: "",
+  isAcademyOnboardingCompleted: false,
 };
 
 export const useSignupStore = create<SignupStore>()((set, get) => ({
@@ -218,6 +226,22 @@ export const useSignupStore = create<SignupStore>()((set, get) => ({
       },
     })),
 
+  updateImageKey: (imageKey) =>
+    set((state) => ({
+      signupData: {
+        ...state.signupData,
+        imageKey,
+      },
+    })),
+
+  updateAcademyOnboardingCompleted: (completed) =>
+    set((state) => ({
+      signupData: {
+        ...state.signupData,
+        isAcademyOnboardingCompleted: completed,
+      },
+    })),
+
   // 필수 약관 모두 동의했는지 확인
   isAllRequiredTermsAgreed: () => {
     const { termsSelectOption } = get().signupData;
@@ -250,5 +274,10 @@ export const useSignupStore = create<SignupStore>()((set, get) => ({
       signupData.memberPhone?.trim() !== "" &&
       signupData.memberEmail?.trim() !== ""
     );
+  },
+
+  // Academy 온보딩 완료 여부 확인
+  isAcademyOnboardingCompleted: () => {
+    return get().signupData.isAcademyOnboardingCompleted;
   },
 }));

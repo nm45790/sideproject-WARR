@@ -6,14 +6,18 @@ import MainContainer from "../../../components/MainContainer";
 import Icons from "../../../components/Icons";
 import { useSignupStore } from "../../../store/signupStore";
 import { authService } from "../../../utils/auth";
+import { uploadFile } from "../../../utils/upload";
+import { apiClient } from "../../../utils/api";
 
 export default function AcademyPicturePage() {
   const router = useRouter();
-  const { signupData } = useSignupStore();
+  const { signupData, updateImageKey, isAcademyOnboardingCompleted } =
+    useSignupStore();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
 
   const userInfo = authService.getCurrentUserInfo();
 
@@ -22,8 +26,15 @@ export default function AcademyPicturePage() {
     if (!userInfo || userInfo.role !== "ACADEMY") {
       alert("잘못된 접근입니다.");
       router.push("/");
+      return;
     }
-  }, [router, userInfo]);
+
+    // 온보딩 완료 여부 체크
+    if (!isAcademyOnboardingCompleted()) {
+      alert("잘못된 접근입니다.");
+      router.push("/");
+    }
+  }, [router, userInfo, isAcademyOnboardingCompleted]);
 
   const handleGoBack = () => {
     router.back();
@@ -43,15 +54,66 @@ export default function AcademyPicturePage() {
     fileInputRef.current?.click();
   };
 
-  const handleNext = () => {
+  const handleRemoveImage = () => {
+    setSelectedFile(null);
+    if (previewUrl) {
+      URL.revokeObjectURL(previewUrl);
+      setPreviewUrl(null);
+    }
+    // 파일 입력 초기화
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  const handleNext = async () => {
     if (!selectedFile) {
       alert("사진을 선택해주세요.");
       return;
     }
 
-    // TODO: 실제 업로드 로직은 나중에 구현
-    console.log("Selected file:", selectedFile);
-    router.push("/signup/academy/complete");
+    setIsUploading(true);
+
+    try {
+      // 1. 이미지 업로드
+      const s3Key = await uploadFile(selectedFile);
+      updateImageKey(s3Key);
+      console.log("Upload successful, s3Key:", s3Key);
+
+      // 2. 회원가입 API 호출
+      const academySignupData = {
+        academyName: signupData.academyName,
+        academyAddress: signupData.academyAddress,
+        academyAddressDetail: signupData.academyAddressDetail,
+        sggCode: signupData.sggCode,
+        academyPhone: signupData.academyPhone,
+        maxCapacity: signupData.maxCapacity,
+        scheduleList: signupData.scheduleList,
+      };
+
+      console.log("회원가입 API 호출:", academySignupData);
+
+      const response = await apiClient.post(
+        "/api/v1/members/signup/academy",
+        academySignupData,
+        {
+          requireAuth: true,
+        },
+      );
+
+      if (response.success) {
+        console.log("회원가입 성공:", response);
+        // 3. 성공 시 완료 페이지로 이동
+        router.push("/signup/academy/complete");
+      } else {
+        throw new Error("회원가입에 실패했습니다.");
+      }
+    } catch (error) {
+      console.error("회원가입 실패:", error);
+      alert("회원가입에 실패했습니다. 다시 시도해주세요.");
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   const isFormValid = selectedFile !== null;
@@ -88,18 +150,44 @@ export default function AcademyPicturePage() {
             {/* 업로드 버튼 */}
             <button
               onClick={handleUploadClick}
-              className={`w-[261px] h-[261px] rounded-[10px] border-2 border-dashed flex flex-col items-center justify-center transition-colors ${
+              className={`w-[261px] h-[261px] rounded-[10px] border-2 border-dashed flex flex-col items-center justify-center transition-colors relative ${
                 selectedFile
                   ? "border-[#3f55ff] bg-[#f8f9ff]"
                   : "border-[#d2d2d2] bg-[#f0f0f0] hover:border-[#3f55ff] hover:bg-[#f8f9ff]"
               }`}
             >
               {previewUrl ? (
-                <img
-                  src={previewUrl}
-                  alt="미리보기"
-                  className="w-full h-full object-cover rounded-[8px]"
-                />
+                <>
+                  <img
+                    src={previewUrl}
+                    alt="미리보기"
+                    className="w-full h-full object-cover rounded-[8px]"
+                  />
+                  {/* 제거 버튼 */}
+                  <div
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleRemoveImage();
+                    }}
+                    className="absolute top-2 right-2 w-6 h-6 bg-black bg-opacity-50 rounded-full flex items-center justify-center hover:bg-opacity-70 transition-colors cursor-pointer"
+                  >
+                    <svg
+                      width="14"
+                      height="14"
+                      viewBox="0 0 14 14"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M10.5 3.5L3.5 10.5M3.5 3.5L10.5 10.5"
+                        stroke="white"
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </div>
+                </>
               ) : (
                 <>
                   {/* 카메라 아이콘 */}
@@ -148,14 +236,16 @@ export default function AcademyPicturePage() {
         {/* 다음 버튼 */}
         <button
           onClick={handleNext}
-          disabled={!isFormValid}
+          disabled={!isFormValid || isUploading}
           className={`w-full h-[59px] rounded-[7px] flex items-center justify-center transition-colors ${
-            isFormValid
+            isFormValid && !isUploading
               ? "bg-[#3f55ff] hover:bg-[#3646e6] cursor-pointer"
               : "bg-[#f0f0f0] cursor-not-allowed"
           }`}
         >
-          <span className="font-semibold text-[16px] text-white">다음</span>
+          <span className="font-semibold text-[16px] text-white">
+            {isUploading ? "회원가입 중..." : "다음"}
+          </span>
         </button>
       </div>
     </MainContainer>

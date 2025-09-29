@@ -15,6 +15,7 @@ export default function AcademyInfoPage() {
     updateAcademyAddress,
     updateAcademyAddressDetail,
     updateSggCode,
+    isAcademyOnboardingCompleted,
   } = useSignupStore();
 
   const [academyName, setAcademyName] = useState(signupData.academyName || "");
@@ -34,8 +35,15 @@ export default function AcademyInfoPage() {
     if (!userInfo || userInfo.role !== "ACADEMY") {
       alert("잘못된 접근입니다.");
       router.push("/");
+      return;
     }
-  }, [router, userInfo]);
+
+    // 온보딩 완료 여부 체크
+    if (!isAcademyOnboardingCompleted()) {
+      alert("잘못된 접근입니다.");
+      router.push("/");
+    }
+  }, [router, userInfo, isAcademyOnboardingCompleted]);
 
   // 주소 선택 완료 처리
   const handleAddressSelect = useCallback(
@@ -142,7 +150,7 @@ export default function AcademyInfoPage() {
     }
 
     // 다음 페이지로 이동
-    router.push("/signup/academy/call");
+    router.push("/signup/academy/phone");
   };
 
   const isFormValid =

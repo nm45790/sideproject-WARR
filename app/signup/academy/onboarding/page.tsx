@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { authService } from "../../../utils/auth";
+import { useSignupStore } from "../../../store/signupStore";
 
 // Figma에서 가져온 이미지 상수들
 const imgBtnBack =
@@ -44,6 +45,7 @@ const onboardingSlides: OnboardingSlide[] = [
 
 export default function AcademyOnboardingPage() {
   const router = useRouter();
+  const { updateAcademyOnboardingCompleted } = useSignupStore();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [startX, setStartX] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
@@ -62,7 +64,8 @@ export default function AcademyOnboardingPage() {
     if (currentSlide < onboardingSlides.length - 1) {
       setCurrentSlide(currentSlide + 1);
     } else {
-      // 마지막 슬라이드에서 다음 버튼 클릭 시 info 페이지로 이동
+      // 마지막 슬라이드에서 다음 버튼 클릭 시 온보딩 완료 플래그 설정하고 info 페이지로 이동
+      updateAcademyOnboardingCompleted(true);
       router.push("/signup/academy/info");
     }
   };

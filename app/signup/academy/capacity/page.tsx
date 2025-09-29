@@ -9,7 +9,8 @@ import { authService } from "../../../utils/auth";
 
 export default function AcademyCapacityPage() {
   const router = useRouter();
-  const { signupData, updateMaxCapacity } = useSignupStore();
+  const { signupData, updateMaxCapacity, isAcademyOnboardingCompleted } =
+    useSignupStore();
 
   const [capacity, setCapacity] = useState(
     signupData.maxCapacity?.toString() || "",
@@ -23,8 +24,15 @@ export default function AcademyCapacityPage() {
     if (!userInfo || userInfo.role !== "ACADEMY") {
       alert("잘못된 접근입니다.");
       router.push("/");
+      return;
     }
-  }, [router, userInfo]);
+
+    // 온보딩 완료 여부 체크
+    if (!isAcademyOnboardingCompleted()) {
+      alert("잘못된 접근입니다.");
+      router.push("/");
+    }
+  }, [router, userInfo, isAcademyOnboardingCompleted]);
 
   // localStorage에서 저장된 값으로 초기값 설정
   useEffect(() => {

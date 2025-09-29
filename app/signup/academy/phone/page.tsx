@@ -9,7 +9,8 @@ import { authService } from "../../../utils/auth";
 
 export default function AcademyCallPage() {
   const router = useRouter();
-  const { signupData, updateAcademyPhone } = useSignupStore();
+  const { signupData, updateAcademyPhone, isAcademyOnboardingCompleted } =
+    useSignupStore();
 
   const [phone, setPhone] = useState(signupData.academyPhone || "");
   const [isPhoneFocused, setIsPhoneFocused] = useState(false);
@@ -21,8 +22,15 @@ export default function AcademyCallPage() {
     if (!userInfo || userInfo.role !== "ACADEMY") {
       alert("잘못된 접근입니다.");
       router.push("/");
+      return;
     }
-  }, [router, userInfo]);
+
+    // 온보딩 완료 여부 체크
+    if (!isAcademyOnboardingCompleted()) {
+      alert("잘못된 접근입니다.");
+      router.push("/");
+    }
+  }, [router, userInfo, isAcademyOnboardingCompleted]);
 
   // localStorage에서 저장된 값으로 초기값 설정
   useEffect(() => {
@@ -34,18 +42,10 @@ export default function AcademyCallPage() {
   };
 
   const formatPhoneNumber = (value: string) => {
-    // 숫자, 하이픈 추출
-    const numbers = value.replace(/\D-/g, "");
+    // 숫자와 하이픈만 허용
+    const cleaned = value.replace(/[^0-9-]/g, "");
 
-    return numbers;
-    // // 길이에 따라 하이픈 추가
-    // if (numbers.length <= 3) {
-    //   return numbers;
-    // } else if (numbers.length <= 7) {
-    //   return `${numbers.slice(0, 3)}-${numbers.slice(3)}`;
-    // } else {
-    //   return `${numbers.slice(0, 3)}-${numbers.slice(3, 7)}-${numbers.slice(7, 11)}`;
-    // }
+    return cleaned;
   };
 
   const handlePhoneChange = (value: string) => {
@@ -105,7 +105,7 @@ export default function AcademyCallPage() {
             onChange={(e) => handlePhoneChange(e.target.value)}
             onFocus={() => setIsPhoneFocused(true)}
             onBlur={() => setIsPhoneFocused(false)}
-            placeholder="대표번호를 입력해주세요"
+            placeholder="010-1234-5678"
             className={`w-full h-[59px] border-[1.5px] rounded-[7px] px-5 text-[16px] font-medium outline-none transition-colors ${
               isPhoneFocused || phone ? "border-[#3f55ff]" : "border-[#d2d2d2]"
             } placeholder:text-[#b4b4b4] placeholder:font-medium`}
