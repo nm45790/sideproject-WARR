@@ -91,8 +91,10 @@ export default function AcademySchedulePage() {
         operatingEndTime: "18:00",
       }));
       setSchedules(defaultSchedules);
+      // signupStore에도 기본값 저장
+      updateScheduleList(defaultSchedules);
     }
-  }, [signupData.scheduleList]);
+  }, [signupData.scheduleList, updateScheduleList]);
 
   const handleGoBack = () => {
     router.back();

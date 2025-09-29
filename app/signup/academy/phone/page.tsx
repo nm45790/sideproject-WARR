@@ -60,7 +60,7 @@ export default function AcademyCallPage() {
       return;
     }
 
-    router.push("/signup/academy/capacity");
+    router.push("/signup/academy/schedule");
   };
 
   const isFormValid = phone?.trim() !== "";

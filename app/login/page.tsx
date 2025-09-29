@@ -50,6 +50,10 @@ export default function LoginPage() {
           router.push("/academy");
         } else if (result.data?.data.role === "TEMP") {
           router.push("/signup/role");
+        } else if (result.data?.data.role === "TEMP_ACADEMY") {
+          router.push("/signup/academy/onboarding");
+        } else if (result.data?.data.role === "TEMP_GUARDIAN") {
+          router.push("/signup/guardian/onboarding");
         }
       } else {
         setError(result.error || "로그인에 실패했습니다.");
