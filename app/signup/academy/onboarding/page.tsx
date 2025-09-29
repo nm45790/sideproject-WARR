@@ -54,7 +54,7 @@ export default function AcademyOnboardingPage() {
 
   // 접근권한 체크
   useEffect(() => {
-    if (!userInfo || userInfo.role !== "TEMP_ACADEMY") {
+    if (!userInfo) {
       alert("잘못된 접근입니다.");
       router.push("/");
     }

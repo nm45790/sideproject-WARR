@@ -35,11 +35,9 @@ export default function Home() {
   useEffect(() => {
     if (userInfo) {
       if (userInfo.role === "ACADEMY") {
-        if (!userInfo.academyId) {
-          router.push("/signup/academy/onboarding");
-        } else {
-          router.push("/academy");
-        }
+        router.push("/academy");
+      } else if (userInfo.role === "TEMP_ACADEMY") {
+        router.push("/signup/academy/onboarding");
       }
     }
   }, []);
