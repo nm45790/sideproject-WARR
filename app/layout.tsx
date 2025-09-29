@@ -35,6 +35,10 @@ export default function RootLayout({
           href="https://unpkg.com/pretendard@1.3.9/dist/web/static/pretendard.css"
           rel="stylesheet"
         />
+        <script
+          src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"
+          async
+        />
         <style dangerouslySetInnerHTML={{ __html: themeCss }} />
       </head>
       <body suppressHydrationWarning className="font-sans">
