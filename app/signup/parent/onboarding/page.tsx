@@ -4,10 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { authService } from "../../../utils/auth";
 import { useSignupStore } from "../../../store/signupStore";
-
-// Figma에서 가져온 이미지 상수들
-const imgBtnBack =
-  "http://localhost:3845/assets/8c5e1938113884a664d4f7d25b382eea88451cd5.svg";
+import Icons from "@/app/components/Icons";
 
 interface OnboardingSlide {
   id: number;
@@ -19,27 +16,15 @@ interface OnboardingSlide {
 const onboardingSlides: OnboardingSlide[] = [
   {
     id: 1,
-    title: "휴대폰 하나로\n우리 아이들을 모두 관리!",
-    description: "등원부터 상황 관리까지 간편하게 처리할 수 있어요!",
-    image: "/images/onboarding-1.png",
+    title: "간편한 등원신청",
+    description: "귀찮은 문의 없이, 쉽고 빠른 등원!",
+    image: "/images/parent/onboarding-1.png",
   },
   {
-    id: 2,
-    title: "간편한 등원/하원 관리",
-    description: "학부모와의 소통을 통해\n반려견의 일상을 안전하게 관리하세요",
-    image: "/images/onboarding-2.png",
-  },
-  {
-    id: 3,
-    title: "체계적인 일정 관리",
-    description: "수업, 급식, 산책 등\n모든 일정을 한눈에 확인하세요",
-    image: "/images/onboarding-3.png",
-  },
-  {
-    id: 4,
-    title: "학부모와의 소통",
-    description: "실시간 알림과 사진 공유로\n학부모와의 신뢰를 쌓아가세요",
-    image: "/images/onboarding-4.png",
+    id: 1,
+    title: "간편한 등원신청",
+    description: "귀찮은 문의 없이, 쉽고 빠른 등원!",
+    image: "/images/parent/onboarding-2.png",
   },
 ];
 
@@ -138,7 +123,6 @@ export default function AcademyOnboardingPage() {
     }
   };
 
-  const currentSlideData = onboardingSlides[currentSlide];
   const isLastSlide = currentSlide === onboardingSlides.length - 1;
 
   return (
@@ -146,11 +130,7 @@ export default function AcademyOnboardingPage() {
       {/* 헤더 영역 */}
       <div className="flex items-center justify-between px-5 pt-[45px] pb-5">
         <button onClick={handleBack} className="w-[26px] h-[22px]">
-          <img
-            alt="뒤로가기"
-            className="block max-w-none size-full"
-            src={imgBtnBack}
-          />
+          <Icons.Prev className="w-[26px] h-[22px]" />
         </button>
 
         {/* 페이지 인디케이터 - 상단 중앙 */}
@@ -185,7 +165,7 @@ export default function AcademyOnboardingPage() {
       >
         {onboardingSlides.map((slide, index) => (
           <div
-            key={slide.id}
+            key={index}
             className="w-full h-full flex-shrink-0 flex flex-col"
           >
             {/* 이미지 영역 */}

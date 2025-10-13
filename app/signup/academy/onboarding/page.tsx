@@ -4,10 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { authService } from "../../../utils/auth";
 import { useSignupStore } from "../../../store/signupStore";
-
-// Figma에서 가져온 이미지 상수들
-const imgBtnBack =
-  "http://localhost:3845/assets/8c5e1938113884a664d4f7d25b382eea88451cd5.svg";
+import Icons from "@/app/components/Icons";
 
 interface OnboardingSlide {
   id: number;
@@ -138,7 +135,6 @@ export default function AcademyOnboardingPage() {
     }
   };
 
-  const currentSlideData = onboardingSlides[currentSlide];
   const isLastSlide = currentSlide === onboardingSlides.length - 1;
 
   return (
@@ -146,11 +142,7 @@ export default function AcademyOnboardingPage() {
       {/* 헤더 영역 */}
       <div className="flex items-center justify-between px-5 pt-[45px] pb-5">
         <button onClick={handleBack} className="w-[26px] h-[22px]">
-          <img
-            alt="뒤로가기"
-            className="block max-w-none size-full"
-            src={imgBtnBack}
-          />
+          <Icons.Prev className="w-[26px] h-[22px]" />
         </button>
 
         {/* 페이지 인디케이터 - 상단 중앙 */}

@@ -192,7 +192,7 @@ export default function DetailsPage() {
           onClick={handleGoBack}
           className="p-[18px] w-[57px] h-[57px] flex items-center justify-center -ml-[18px]"
         >
-          <Icons.ArrowLeft className="w-[24px] h-[24px] text-[#363e4a]" />
+          <Icons.Prev className="w-[26px] h-[22px]" />
         </button>
         <h1 className="text-[25px] font-bold text-[#363e4a] leading-[30px] ml-4">
           회원가입

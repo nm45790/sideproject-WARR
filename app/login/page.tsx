@@ -45,15 +45,15 @@ export default function LoginPage() {
         console.log("로그인된 사용자 정보:", userInfo);
 
         if (result.data?.data.role === "USER") {
-          router.push("/guardian");
+          router.push("/parent");
         } else if (result.data?.data.role === "ACADEMY") {
           router.push("/academy");
         } else if (result.data?.data.role === "TEMP") {
           router.push("/signup/role");
         } else if (result.data?.data.role === "TEMP_ACADEMY") {
           router.push("/signup/academy/onboarding");
-        } else if (result.data?.data.role === "TEMP_GUARDIAN") {
-          router.push("/signup/guardian/onboarding");
+        } else if (result.data?.data.role === "TEMP_USER") {
+          router.push("/signup/parent/onboarding");
         }
       } else {
         setError(result.error || "로그인에 실패했습니다.");
