@@ -1,12 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import MainContainer from "../components/MainContainer";
-import Splash from "../components/Splash";
+import MainContainer from "../../../components/MainContainer";
+import Splash from "../../../components/Splash";
 import { useRouter } from "next/navigation";
-import { useAuth } from "../components/CombinedProvider";
+import { useAuth } from "../../../components/CombinedProvider";
 
-export default function Academy() {
+export default function AcademyStatusDetailPage() {
   const router = useRouter();
   const isProduction = process.env.NODE_ENV === "production";
   const userInfo = useAuth();

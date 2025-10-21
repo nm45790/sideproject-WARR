@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import theme from "@/app/utils/theme";
 import CombinedProvider from "@/app/components/CombinedProvider";
+import { cookies } from "next/headers";
 
 export const metadata: Metadata = {
   title: "🐶 Warr",
@@ -21,12 +22,25 @@ function buildThemeCssVariables(): string {
   return `:root {\n${colorVars}\n}`;
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   const themeCss = buildThemeCssVariables();
+
+  // 서버에서 쿠키로부터 userInfo 읽기
+  const cookieStore = await cookies();
+  const userInfoCookie = cookieStore.get("user_info");
+  let userInfo = null;
+
+  if (userInfoCookie?.value) {
+    try {
+      userInfo = JSON.parse(userInfoCookie.value);
+    } catch (error) {
+      console.error("Failed to parse user_info cookie:", error);
+    }
+  }
 
   return (
     <html lang="en">
@@ -42,7 +56,7 @@ export default function RootLayout({
         <style dangerouslySetInnerHTML={{ __html: themeCss }} />
       </head>
       <body suppressHydrationWarning className="font-sans">
-        <CombinedProvider>{children}</CombinedProvider>
+        <CombinedProvider userInfo={userInfo}>{children}</CombinedProvider>
       </body>
     </html>
   );
