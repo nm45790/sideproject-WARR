@@ -3,20 +3,46 @@
 import { useEffect, useState } from "react";
 import MainContainer from "../components/MainContainer";
 import Splash from "../components/Splash";
-import { useRouter } from "next/navigation";
+import DatePickerModal from "../components/DatePickerModal";
 import { useAuth } from "../components/CombinedProvider";
+import { api } from "../utils/api";
+import { formatApiDate, formatDate } from "../utils/date";
 
 export default function Academy() {
-  const router = useRouter();
   const isProduction = process.env.NODE_ENV === "production";
   const userInfo = useAuth();
 
   const [splashFading, setSplashFading] = useState(isProduction ? false : true);
   const [mainVisible, setMainVisible] = useState(isProduction ? false : true);
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
+  const [totalDogs, setTotalDogs] = useState(0);
 
-  // 임시 데이터
-  const totalDogs = 6;
-  const currentDate = "2025.09.08 월요일";
+  // 일정 데이터 조회
+  const fetchScheduleData = async (date: Date) => {
+    if (!userInfo?.academyId) return;
+
+    try {
+      const searchDay = formatApiDate(date);
+      const response = await api.get(
+        `/api/v1/academies/${userInfo.academyId}/schedules/date/${searchDay}`,
+      );
+
+      if (response.success && response.data) {
+        const data = response.data as any;
+        // currentReservations 값을 totalDogs로 설정
+        setTotalDogs(data.currentReservations || 0);
+      }
+    } catch (error) {
+      console.error("일정 조회 실패:", error);
+    } finally {
+    }
+  };
+
+  // 날짜가 변경될 때마다 데이터 조회
+  useEffect(() => {
+    fetchScheduleData(selectedDate);
+  }, [selectedDate, userInfo?.academyId]);
 
   useEffect(() => {
     if (isProduction) {
@@ -34,6 +60,34 @@ export default function Academy() {
       };
     }
   }, [isProduction]);
+
+  const handleDateSelect = (date: Date) => {
+    setSelectedDate(date);
+  };
+
+  // 이전 날짜로 이동
+  const handlePrevDay = () => {
+    const prevDay = new Date(selectedDate);
+    prevDay.setDate(prevDay.getDate() - 1);
+    setSelectedDate(prevDay);
+  };
+
+  // 다음 날짜로 이동
+  const handleNextDay = () => {
+    const nextDay = new Date(selectedDate);
+    nextDay.setDate(nextDay.getDate() + 1);
+    setSelectedDate(nextDay);
+  };
+
+  // 오늘 날짜인지 확인
+  const isToday = (date: Date) => {
+    const today = new Date();
+    return (
+      date.getFullYear() === today.getFullYear() &&
+      date.getMonth() === today.getMonth() &&
+      date.getDate() === today.getDate()
+    );
+  };
 
   return (
     <>
@@ -63,7 +117,10 @@ export default function Academy() {
             </div>
 
             {/* 날짜 표시 */}
-            <div className="mt-[37px] bg-white rounded-[7px] inline-flex items-center gap-[9px] h-[40px] pl-[12px] pr-[12px]">
+            <button
+              onClick={() => setIsDatePickerOpen(true)}
+              className="mt-[37px] bg-white rounded-[7px] inline-flex items-center gap-[9px] h-[40px] pl-[12px] pr-[12px] hover:bg-gray-50 transition-colors"
+            >
               <div className="w-[9px] h-[10px]">
                 <svg
                   width="9"
@@ -79,9 +136,9 @@ export default function Academy() {
                 </svg>
               </div>
               <p className="font-semibold text-[#858585] text-[14px] leading-[17px]">
-                {currentDate}
+                {formatDate(selectedDate)}
               </p>
-            </div>
+            </button>
 
             {/* 등원 현황 카드 */}
             <div className="mt-[8px] bg-white rounded-[7px] shadow-[0px_1px_3px_0px_rgba(0,0,0,0.1)] h-[200px] relative">
@@ -114,21 +171,43 @@ export default function Academy() {
                 </p>
               </div>
 
-              {/* 화살표 */}
-              <div className="absolute top-[91px] right-[20px]">
+              {/* 이전 날짜 버튼 */}
+              <button
+                onClick={handlePrevDay}
+                className="absolute top-[91px] left-[20px] hover:opacity-70 transition-opacity"
+              >
                 <svg width="6" height="13" viewBox="0 0 6 13" fill="none">
                   <path
-                    d="M1 1L5 6.5L1 12"
+                    d="M5 1L1 6.5L5 12"
                     stroke="#858585"
                     strokeWidth="1.5"
                     strokeLinecap="round"
                     strokeLinejoin="round"
                   />
                 </svg>
-              </div>
+              </button>
+
+              {/* 다음 날짜 버튼 - 오늘이 아닐 때만 표시 */}
+              {!isToday(selectedDate) && (
+                <button
+                  onClick={handleNextDay}
+                  className="absolute top-[91px] right-[20px] hover:opacity-70 transition-opacity"
+                >
+                  <svg width="6" height="13" viewBox="0 0 6 13" fill="none">
+                    <path
+                      d="M1 1L5 6.5L1 12"
+                      stroke="#858585"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </button>
+              )}
             </div>
 
             {/* 메뉴 카드 그리드 */}
+            {/* TODO: 아이콘 -> 이미지로 수정하기 */}
             <div className="mt-[11px] grid grid-cols-2 gap-x-[11px] gap-y-[11px]">
               {/* 아이들 관리 */}
               <button className="bg-white rounded-[7px] shadow-[0px_1px_3px_0px_rgba(0,0,0,0.1)] w-full h-[162px] flex flex-col items-center justify-center hover:bg-gray-50 transition-colors">
@@ -216,6 +295,14 @@ export default function Academy() {
       >
         <Splash />
       </div>
+
+      {/* 날짜 선택 모달 */}
+      <DatePickerModal
+        isOpen={isDatePickerOpen}
+        onClose={() => setIsDatePickerOpen(false)}
+        selectedDate={selectedDate}
+        onDateSelect={handleDateSelect}
+      />
     </>
   );
 }
