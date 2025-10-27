@@ -4,10 +4,12 @@ export const MainContainer = ({
   children,
   className,
   bg = "white",
+  noPadding = false,
 }: {
   children: React.ReactNode;
   className?: string;
   bg?: string;
+  noPadding?: boolean;
 }) => {
   return (
     <div className="w-full flex justify-center bg-gray-300">
@@ -23,7 +25,7 @@ export const MainContainer = ({
           style={{ paddingBottom: "var(--safe-bottom)" }}
         >
           <div
-            className={`bg-[${bg}] relative w-full min-h-dvh px-5 flex flex-col`}
+            className={`bg-[${bg}] relative w-full min-h-dvh ${noPadding ? "" : "px-5"} flex flex-col`}
           >
             {children}
           </div>

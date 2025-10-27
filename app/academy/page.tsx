@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
+import Link from "next/link";
 import MainContainer from "../components/MainContainer";
 import Splash from "../components/Splash";
 import DatePickerModal from "../components/DatePickerModal";
@@ -89,6 +90,15 @@ export default function Academy() {
     );
   };
 
+  // status 페이지 URL 생성 (날짜 쿼리스트링 포함)
+  const statusUrl = useMemo(() => {
+    const yy = selectedDate.getFullYear().toString().substring(2);
+    const mm = (selectedDate.getMonth() + 1).toString().padStart(2, "0");
+    const dd = selectedDate.getDate().toString().padStart(2, "0");
+    const dateStr = `${yy}${mm}${dd}`;
+    return `/academy/status?date=${dateStr}`;
+  }, [selectedDate]);
+
   return (
     <>
       {/* 메인 콘텐츠 */}
@@ -98,7 +108,7 @@ export default function Academy() {
         } w-full flex justify-center`}
       >
         <MainContainer bg="#f3f4f9">
-          <div className="relative w-full min-h-dvh">
+          <div className="relative w-full min-h-dvh px-5">
             {/* 인사말 및 아카데미 이름 */}
             <div className="pt-[73px]">
               <p className="font-bold text-[#363e4a] text-[20px] leading-[24px]">
@@ -141,61 +151,25 @@ export default function Academy() {
             </button>
 
             {/* 등원 현황 카드 */}
-            <div className="mt-[8px] bg-white rounded-[7px] shadow-[0px_1px_3px_0px_rgba(0,0,0,0.1)] h-[200px] relative">
+            <div className="mt-[8px] bg-white rounded-[7px] shadow-[0px_1px_3px_0px_rgba(0,0,0,0.1)] py-[15px] px-[20px]">
               {/* 상단 안내문구 */}
-              <div className="absolute top-[15px] left-[15px] flex items-center gap-[8px]">
+              <div className="flex items-center gap-[8px] mb-[32px]">
                 <div className="w-[4px] h-[4px] rounded-full bg-[#858585]" />
                 <p className="font-medium text-[#858585] text-[12px] leading-[14px]">
                   보호자가 등원 신청하면 바로 확인 가능해요
                 </p>
               </div>
 
-              {/* 총 마리수 */}
-              <div className="absolute top-[61px] left-1/2 -translate-x-1/2">
-                <p className="font-bold text-[#363e4a] text-[55px] leading-[54px] text-center">
-                  {totalDogs}
-                </p>
-              </div>
-
-              {/* 마리 텍스트 */}
-              <div className="absolute top-[122px] left-1/2 -translate-x-1/2">
-                <p className="font-bold text-[#363e4a] text-[20px] leading-[normal]">
-                  마리
-                </p>
-              </div>
-
-              {/* 오늘 배지 */}
-              <div className="absolute top-[152px] left-1/2 -translate-x-1/2 bg-[#f9f0fb] rounded-[7px] px-[10px] py-[5px]">
-                <p className="font-bold text-[#a052ff] text-[12px] leading-[normal]">
-                  오늘
-                </p>
-              </div>
-
-              {/* 이전 날짜 버튼 */}
-              <button
-                onClick={handlePrevDay}
-                className="absolute top-[91px] left-[20px] hover:opacity-70 transition-opacity"
-              >
-                <svg width="6" height="13" viewBox="0 0 6 13" fill="none">
-                  <path
-                    d="M5 1L1 6.5L5 12"
-                    stroke="#858585"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </button>
-
-              {/* 다음 날짜 버튼 - 오늘이 아닐 때만 표시 */}
-              {!isToday(selectedDate) && (
+              {/* 중앙 컨텐츠 영역 */}
+              <div className="flex items-center justify-between">
+                {/* 이전 날짜 버튼 */}
                 <button
-                  onClick={handleNextDay}
-                  className="absolute top-[91px] right-[20px] hover:opacity-70 transition-opacity"
+                  onClick={handlePrevDay}
+                  className="hover:opacity-70 transition-opacity flex-shrink-0"
                 >
                   <svg width="6" height="13" viewBox="0 0 6 13" fill="none">
                     <path
-                      d="M1 1L5 6.5L1 12"
+                      d="M5 1L1 6.5L5 12"
                       stroke="#858585"
                       strokeWidth="1.5"
                       strokeLinecap="round"
@@ -203,7 +177,45 @@ export default function Academy() {
                     />
                   </svg>
                 </button>
-              )}
+
+                {/* 중앙 숫자 및 텍스트 */}
+                <Link
+                  href={statusUrl}
+                  className="flex-1 flex flex-col items-center hover:opacity-80 transition-opacity cursor-pointer"
+                >
+                  <p className="font-bold text-[#363e4a] text-[55px] leading-[54px] text-center mb-[7px]">
+                    {totalDogs}
+                  </p>
+                  <p className="font-bold text-[#363e4a] text-[20px] leading-[normal] mb-[8px]">
+                    마리
+                  </p>
+                  <div className="bg-[#f9f0fb] rounded-[7px] px-[10px] py-[5px]">
+                    <p className="font-bold text-[#a052ff] text-[12px] leading-[normal]">
+                      오늘
+                    </p>
+                  </div>
+                </Link>
+
+                {/* 다음 날짜 버튼 - 오늘이 아닐 때만 표시 */}
+                {!isToday(selectedDate) ? (
+                  <button
+                    onClick={handleNextDay}
+                    className="hover:opacity-70 transition-opacity flex-shrink-0"
+                  >
+                    <svg width="6" height="13" viewBox="0 0 6 13" fill="none">
+                      <path
+                        d="M1 1L5 6.5L1 12"
+                        stroke="#858585"
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </button>
+                ) : (
+                  <div className="w-[6px] flex-shrink-0" />
+                )}
+              </div>
             </div>
 
             {/* 메뉴 카드 그리드 */}
