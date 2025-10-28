@@ -6,7 +6,8 @@ import MainContainer from "../../components/MainContainer";
 import Icons from "../../components/Icons";
 import { useAuth } from "../../components/CombinedProvider";
 import { api } from "../../utils/api";
-import { formatApiDate } from "../../utils/date";
+import { formatApiDate, formatDateWithDay } from "../../utils/date";
+import { MOCK_RESERVATIONS } from "@/app/constants/mock";
 
 interface Dog {
   id: number;
@@ -22,76 +23,6 @@ interface Reservation {
   reservationDate: string;
   status: string;
 }
-
-// 하드코딩 데이터
-const MOCK_RESERVATIONS: Reservation[] = [
-  {
-    id: 1,
-    dog: {
-      id: 1,
-      name: "지동이",
-      breed: "보더콜리",
-      gender: "MALE",
-    },
-    reservationDate: "2025-09-08",
-    status: "CONFIRMED",
-  },
-  {
-    id: 2,
-    dog: {
-      id: 2,
-      name: "초코",
-      breed: "푸들",
-      gender: "FEMALE",
-    },
-    reservationDate: "2025-09-08",
-    status: "CONFIRMED",
-  },
-  {
-    id: 3,
-    dog: {
-      id: 3,
-      name: "말포이",
-      breed: "셔틀랜드 쉽독",
-      gender: "MALE",
-    },
-    reservationDate: "2025-09-08",
-    status: "CONFIRMED",
-  },
-  {
-    id: 4,
-    dog: {
-      id: 4,
-      name: "어쭈",
-      breed: "말티푸",
-      gender: "FEMALE",
-    },
-    reservationDate: "2025-09-08",
-    status: "CONFIRMED",
-  },
-  {
-    id: 5,
-    dog: {
-      id: 5,
-      name: "배추",
-      breed: "푸들",
-      gender: "FEMALE",
-    },
-    reservationDate: "2025-09-08",
-    status: "CONFIRMED",
-  },
-  {
-    id: 6,
-    dog: {
-      id: 6,
-      name: "뽀삐",
-      breed: "말티즈",
-      gender: "MALE",
-    },
-    reservationDate: "2025-09-08",
-    status: "CONFIRMED",
-  },
-];
 
 const AcademyStatusPage = () => {
   const router = useRouter();
@@ -134,18 +65,18 @@ const AcademyStatusPage = () => {
         // 데이터가 비어있으면 하드코딩 데이터 사용
         // !TODO: 테스트 끝나면 목데이터 제거
         if (data.length === 0) {
-          setReservations(MOCK_RESERVATIONS);
+          setReservations(MOCK_RESERVATIONS as Reservation[]);
         } else {
           setReservations(data as Reservation[]);
         }
       } else {
         // 응답이 없으면 하드코딩 데이터 사용
-        setReservations(MOCK_RESERVATIONS);
+        setReservations(MOCK_RESERVATIONS as Reservation[]);
       }
     } catch (error) {
       console.error("예약 조회 실패:", error);
       // 에러 시 하드코딩 데이터 사용
-      setReservations(MOCK_RESERVATIONS);
+      setReservations(MOCK_RESERVATIONS as Reservation[]);
     } finally {
       setIsLoading(false);
     }
@@ -155,24 +86,6 @@ const AcademyStatusPage = () => {
   useEffect(() => {
     fetchReservations(selectedDate);
   }, [selectedDate, userInfo?.academyId]);
-
-  // 날짜를 "YYYY.MM.DD 요일" 형식으로 포맷
-  const formatDateWithDay = (date: Date) => {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-    const dayNames = [
-      "일요일",
-      "월요일",
-      "화요일",
-      "수요일",
-      "목요일",
-      "금요일",
-      "토요일",
-    ];
-    const dayName = dayNames[date.getDay()];
-    return `${year}.${month}.${day} ${dayName}`;
-  };
 
   return (
     <MainContainer bg="#ffffff" noPadding>
