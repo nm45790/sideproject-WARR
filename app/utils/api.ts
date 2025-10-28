@@ -50,9 +50,11 @@ class ApiClient {
     try {
       const refreshToken = tokenManager.getRefreshToken();
       if (!refreshToken) {
-        throw new Error("리프레시 토큰이 없습니다.");
+        console.warn("리프레시 토큰이 없습니다.");
+        return false;
       }
 
+      console.log("🔄 토큰 갱신 시도");
       const response = await fetch(`${this.baseURL}/api/v1/auth/refresh`, {
         method: "POST",
         headers: {
@@ -62,33 +64,33 @@ class ApiClient {
       });
 
       if (!response.ok) {
-        throw new Error("토큰 갱신 실패");
+        console.error("토큰 갱신 실패: HTTP", response.status);
+        return false;
       }
 
-      const data = await response.json();
+      const result = await response.json();
+      console.log("토큰 갱신 응답:", result);
+
+      // API 응답 구조에 따라 처리 (data.data 또는 data 직접)
+      const data = result.data || result;
 
       if (data.accessToken) {
         tokenManager.setAccessToken(data.accessToken);
+        console.log("✅ AccessToken 갱신 성공");
 
         // 새로운 리프레시 토큰이 있다면 업데이트
         if (data.refreshToken) {
           tokenManager.setRefreshToken(data.refreshToken);
+          console.log("✅ RefreshToken 갱신 성공");
         }
 
         return true;
       }
 
-      throw new Error("새로운 액세스 토큰을 받지 못했습니다.");
+      console.error("응답에 accessToken이 없습니다:", data);
+      return false;
     } catch (error) {
-      console.error("토큰 갱신 실패:", error);
-      // 토큰 갱신 실패 시 모든 토큰 삭제
-      tokenManager.clearTokens();
-
-      // 로그인 페이지로 리다이렉트
-      if (typeof window !== "undefined") {
-        window.location.href = "/login";
-      }
-
+      console.error("토큰 갱신 중 예외 발생:", error);
       return false;
     }
   }
@@ -120,6 +122,18 @@ class ApiClient {
         const refreshSuccess = await this.refreshToken();
         if (refreshSuccess) {
           accessToken = tokenManager.getAccessToken();
+        } else {
+          // 토큰 갱신 실패 시 로그인 필요
+          console.error("토큰 갱신 실패 - 로그인 필요");
+          tokenManager.clearTokens();
+          if (typeof window !== "undefined") {
+            window.location.href = "/login";
+          }
+          return {
+            success: false,
+            error: "인증이 만료되었습니다. 다시 로그인해주세요.",
+            statusCode: 401,
+          };
         }
       }
 
@@ -141,10 +155,12 @@ class ApiClient {
 
       // 401 에러 처리 (토큰 만료)
       if (response.status === 401 && requireAuth) {
+        console.log("🔐 401 에러 발생 - 토큰 갱신 시도");
         const refreshSuccess = await this.refreshToken();
 
         if (refreshSuccess) {
           // 토큰 갱신 성공 시 원래 요청 재시도
+          console.log("✅ 토큰 갱신 성공 - 원래 요청 재시도");
           const newAccessToken = tokenManager.getAccessToken();
           if (newAccessToken) {
             requestHeaders.Authorization = `Bearer ${newAccessToken}`;
@@ -155,6 +171,13 @@ class ApiClient {
             });
 
             return this.parseResponse<T>(retryResponse);
+          }
+        } else {
+          // 토큰 갱신 실패 시 로그인 페이지로 리다이렉트
+          console.error("❌ 토큰 갱신 실패 - 로그인 페이지로 이동");
+          tokenManager.clearTokens();
+          if (typeof window !== "undefined") {
+            window.location.href = "/login";
           }
         }
 
