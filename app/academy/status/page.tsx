@@ -7,28 +7,30 @@ import Icons from "../../components/Icons";
 import { useAuth } from "../../components/CombinedProvider";
 import { api } from "../../utils/api";
 import { formatApiDate, formatDateWithDay } from "../../utils/date";
-import { MOCK_RESERVATIONS } from "@/app/constants/mock";
-
-interface Dog {
-  id: number;
-  name: string;
-  breed: string;
-  imageUrl?: string;
-  gender: "MALE" | "FEMALE";
-}
 
 interface Reservation {
   id: number;
-  dog: Dog;
+  petId: number;
+  academyId: number;
+  petName: string;
+  petBreed: string;
+  academyName: string;
   reservationDate: string;
-  status: string;
+  reservationStatus: string;
+  petImage: string | null;
+}
+
+interface ApiResponse {
+  reservations: Reservation[];
+  totalCount: number;
+  checkedInCount: number;
 }
 
 const AcademyStatusPage = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const userInfo = useAuth();
-  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -42,6 +44,9 @@ const AcademyStatusPage = () => {
       const day = parseInt(dateParam.substring(4, 6));
       const date = new Date(year, month, day);
       setSelectedDate(date);
+    } else {
+      // 쿼리스트링이 없으면 오늘 날짜로 설정
+      setSelectedDate(new Date());
     }
   }, [searchParams]);
 
@@ -56,27 +61,16 @@ const AcademyStatusPage = () => {
         `/api/v1/reservations/academy/${userInfo.academyId}?date=${searchDay}`,
       );
 
-      if (response.success && response.data) {
-        // API 응답이 배열인지 확인
-        const data = Array.isArray(response.data)
-          ? response.data
-          : (response.data as any).reservations || [];
-
-        // 데이터가 비어있으면 하드코딩 데이터 사용
-        // !TODO: 테스트 끝나면 목데이터 제거
-        if (data.length === 0) {
-          setReservations(MOCK_RESERVATIONS as Reservation[]);
-        } else {
-          setReservations(data as Reservation[]);
-        }
+      if (response.success && response.data && (response.data as any).data) {
+        const apiData = (response.data as any).data as ApiResponse;
+        const reservationsData = apiData.reservations || [];
+        setReservations(reservationsData);
       } else {
-        // 응답이 없으면 하드코딩 데이터 사용
-        setReservations(MOCK_RESERVATIONS as Reservation[]);
+        setReservations([]);
       }
     } catch (error) {
       console.error("예약 조회 실패:", error);
-      // 에러 시 하드코딩 데이터 사용
-      setReservations(MOCK_RESERVATIONS as Reservation[]);
+      setReservations([]);
     } finally {
       setIsLoading(false);
     }
@@ -84,7 +78,9 @@ const AcademyStatusPage = () => {
 
   // 날짜가 변경될 때마다 데이터 조회
   useEffect(() => {
-    fetchReservations(selectedDate);
+    if (selectedDate) {
+      fetchReservations(selectedDate);
+    }
   }, [selectedDate, userInfo?.academyId]);
 
   return (
@@ -115,7 +111,7 @@ const AcademyStatusPage = () => {
           {/* 오른쪽: 날짜 */}
           <div className="pt-[28px]">
             <p className="font-semibold text-[#161111] text-[14px] leading-[normal]">
-              {formatDateWithDay(selectedDate)}
+              {selectedDate ? formatDateWithDay(selectedDate) : ""}
             </p>
           </div>
         </div>
@@ -125,7 +121,7 @@ const AcademyStatusPage = () => {
 
         {/* 강아지 리스트 */}
         <div className="px-[20px] mt-[20px] space-y-[3px] pb-[24px]">
-          {isLoading ? (
+          {!selectedDate || isLoading ? (
             <div className="flex items-center justify-center py-[60px]">
               <p className="text-[#858585] text-[14px]">로딩 중...</p>
             </div>
@@ -143,10 +139,10 @@ const AcademyStatusPage = () => {
               >
                 {/* 강아지 이미지 */}
                 <div className="w-[50px] h-[50px] rounded-full bg-[#e5e5e5] flex items-center justify-center flex-shrink-0 overflow-hidden">
-                  {reservation.dog.imageUrl ? (
+                  {reservation.petImage ? (
                     <img
-                      src={reservation.dog.imageUrl}
-                      alt={reservation.dog.name}
+                      src={reservation.petImage}
+                      alt={reservation.petName}
                       className="w-full h-full object-cover"
                     />
                   ) : (
@@ -165,17 +161,11 @@ const AcademyStatusPage = () => {
 
                 {/* 강아지 정보 */}
                 <div className="flex-1">
-                  <div className="flex items-center gap-[4px] mb-[4px]">
-                    <p className="font-bold text-[#363e4a] text-[18px] leading-[normal]">
-                      {reservation.dog.name}
-                    </p>
-                    {/* 성별 아이콘 */}
-                    <span className="text-[16px]">
-                      {reservation.dog.gender === "MALE" ? "♂" : "♀"}
-                    </span>
-                  </div>
+                  <p className="font-bold text-[#363e4a] text-[18px] leading-[normal] mb-[4px]">
+                    {reservation.petName}
+                  </p>
                   <p className="font-medium text-[#6e7783] text-[12px] leading-[normal]">
-                    {reservation.dog.breed}
+                    {reservation.petBreed}
                   </p>
                 </div>
               </div>
