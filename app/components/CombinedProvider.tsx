@@ -31,6 +31,28 @@ export function useAuth() {
   return useContext(UserContext);
 }
 
+// 클라이언트에서 쿠키를 읽어서 초기 상태 설정
+function getInitialUserInfo(serverUserInfo?: UserInfo | null): UserInfo | null {
+  // 서버에서 받은 userInfo가 있으면 사용
+  if (serverUserInfo) {
+    return serverUserInfo;
+  }
+
+  // 클라이언트 사이드에서만 쿠키 읽기
+  if (typeof window !== "undefined") {
+    const userInfoCookie = cookies.get("user_info");
+    if (userInfoCookie) {
+      try {
+        return JSON.parse(userInfoCookie);
+      } catch (error) {
+        console.error("Failed to parse user_info cookie:", error);
+      }
+    }
+  }
+
+  return null;
+}
+
 export default function CombinedProvider({
   children,
   userInfo: initialUserInfo,
@@ -38,11 +60,11 @@ export default function CombinedProvider({
   children: ReactNode;
   userInfo?: UserInfo | null;
 }) {
-  const [userInfo, setUserInfo] = useState<UserInfo | null>(
-    initialUserInfo || null,
+  const [userInfo, setUserInfo] = useState<UserInfo | null>(() =>
+    getInitialUserInfo(initialUserInfo),
   );
 
-  // 클라이언트 측에서 쿠키를 다시 확인
+  // 쿠키 변경을 감지하여 업데이트 (로그인/로그아웃 시)
   useEffect(() => {
     const userInfoCookie = cookies.get("user_info");
     if (userInfoCookie) {
@@ -52,8 +74,11 @@ export default function CombinedProvider({
       } catch (error) {
         console.error("Failed to parse user_info cookie:", error);
       }
+    } else if (!initialUserInfo) {
+      // 쿠키가 없고 서버에서도 없으면 null로 설정
+      setUserInfo(null);
     }
-  }, []);
+  }, [initialUserInfo]);
 
   return (
     <QueryClientProvider client={queryClient}>
