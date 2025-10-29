@@ -135,7 +135,12 @@ const AcademyStatusPage = () => {
             reservations.map((reservation) => (
               <div
                 key={reservation.id}
-                className="bg-white rounded-[7px] h-[68px] flex items-center px-[10px] gap-[6px]"
+                onClick={() =>
+                  router.push(
+                    `/academy/status/detail?petId=${reservation.petId}`,
+                  )
+                }
+                className="bg-white rounded-[7px] h-[68px] flex items-center px-[10px] gap-[6px] cursor-pointer hover:bg-gray-50 transition-colors"
               >
                 {/* 강아지 이미지 */}
                 <div className="w-[50px] h-[50px] rounded-full bg-[#e5e5e5] flex items-center justify-center flex-shrink-0 overflow-hidden">
