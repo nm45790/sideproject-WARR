@@ -159,48 +159,6 @@ export const authService = {
   },
 
   /**
-   * 현재 사용자 정보 조회 (서버에서)
-   */
-  async getCurrentUser(): Promise<{
-    success: boolean;
-    data?: LoginResponse["data"];
-    error?: string;
-  }> {
-    try {
-      const response = await api.get<{
-        code: number;
-        data: LoginResponse["data"];
-      }>("/api/v1/auth/me");
-
-      if (response.success && response.data) {
-        const userData = response.data.data;
-
-        // 서버에서 받은 사용자 정보를 쿠키에 저장
-        if (userData) {
-          tokenManager.setUserInfo(userData);
-          console.log("✅ 서버에서 사용자 정보 가져오기 성공:", userData);
-        }
-
-        return {
-          success: true,
-          data: userData,
-        };
-      }
-
-      return {
-        success: false,
-        error: response.error || "사용자 정보를 가져올 수 없습니다.",
-      };
-    } catch (error) {
-      console.error("사용자 정보 조회 오류:", error);
-      return {
-        success: false,
-        error: "네트워크 오류가 발생했습니다.",
-      };
-    }
-  },
-
-  /**
    * 인증 상태 확인
    */
   isAuthenticated(): boolean {

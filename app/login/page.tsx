@@ -61,7 +61,7 @@ export default function LoginPage() {
         }
       }
 
-      // 3. 액세스 토큰 없고 리프레시 토큰만 있으면 → 토큰 갱신 후 사용자 정보 조회
+      // 3. 액세스 토큰 없고 리프레시 토큰만 있으면 → 토큰 갱신 후 user_info 확인
       if (!hasAccessToken && hasRefreshToken) {
         console.log("🔄 [조건3] 리프레시 토큰만 있음 - 토큰 갱신 시도");
         setIsLoading(true);
@@ -69,18 +69,19 @@ export default function LoginPage() {
         const refreshResult = await authService.refreshToken();
 
         if (refreshResult.success) {
-          console.log("✅ 토큰 갱신 성공 - 사용자 정보 조회 중...");
+          console.log("✅ 토큰 갱신 성공");
 
-          // 토큰 갱신 후 사용자 정보 조회 API 호출
-          const userResult = await authService.getCurrentUser();
+          // 갱신 후 쿠키에서 user_info 확인
+          userInfo = authService.getCurrentUserInfo();
+          console.log("🔍 쿠키에서 user_info 확인:", userInfo);
 
-          if (userResult.success && userResult.data) {
-            console.log("✅ 사용자 정보 조회 성공 - 자동 이동");
-            redirectByRole(userResult.data.role);
+          if (userInfo) {
+            console.log("✅ user_info 있음 - 자동 이동");
+            redirectByRole(userInfo.role);
             setIsLoading(false);
             return;
           } else {
-            console.error("❌ 사용자 정보 조회 실패 - 로그인 페이지 유지");
+            console.error("❌ user_info 없음 - 로그인 페이지 유지");
             const { tokenManager } = await import("../utils/cookies");
             tokenManager.clearTokens();
           }
