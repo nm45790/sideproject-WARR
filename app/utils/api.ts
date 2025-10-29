@@ -15,7 +15,10 @@ interface RequestOptions extends Omit<RequestInit, "body"> {
 class ApiClient {
   private baseURL: string;
   private isRefreshing = false;
-  private refreshPromise: Promise<boolean> | null = null;
+  private refreshPromise: Promise<{
+    success: boolean;
+    shouldLogout: boolean;
+  }> | null = null;
 
   constructor() {
     this.baseURL = process.env.NEXT_PUBLIC_API_URL || "";
@@ -29,7 +32,10 @@ class ApiClient {
   /**
    * 토큰 갱신
    */
-  private async refreshToken(): Promise<boolean> {
+  private async refreshToken(): Promise<{
+    success: boolean;
+    shouldLogout: boolean;
+  }> {
     if (this.isRefreshing && this.refreshPromise) {
       return this.refreshPromise;
     }
@@ -46,12 +52,15 @@ class ApiClient {
     }
   }
 
-  private async performTokenRefresh(): Promise<boolean> {
+  private async performTokenRefresh(): Promise<{
+    success: boolean;
+    shouldLogout: boolean;
+  }> {
     try {
       const refreshToken = tokenManager.getRefreshToken();
       if (!refreshToken) {
         console.warn("리프레시 토큰이 없습니다.");
-        return false;
+        return { success: false, shouldLogout: true };
       }
 
       console.log("🔄 토큰 갱신 시도");
@@ -63,18 +72,28 @@ class ApiClient {
         body: JSON.stringify({ refreshToken }),
       });
 
+      // 401, 403: 리프레시 토큰 만료 또는 무효 -> 로그아웃 필요
+      if (response.status === 401 || response.status === 403) {
+        console.error("❌ 리프레시 토큰 만료 또는 무효 - 로그아웃 필요");
+        return { success: false, shouldLogout: true };
+      }
+
+      // 다른 에러: 네트워크 오류 등 -> 로그아웃 불필요
       if (!response.ok) {
-        console.error("토큰 갱신 실패: HTTP", response.status);
-        return false;
+        console.error(
+          "⚠️ 토큰 갱신 실패 (일시적 오류 가능): HTTP",
+          response.status,
+        );
+        return { success: false, shouldLogout: false };
       }
 
       const result = await response.json();
       console.log("토큰 갱신 응답:", result);
 
-      // API 응답 구조에 따라 처리 (data.data 또는 data 직접)
-      const data = result.data || result;
+      // API 응답 구조: { code: 1073741824, data: { accessToken, refreshToken } }
+      const data = result.data;
 
-      if (data.accessToken) {
+      if (data?.accessToken) {
         tokenManager.setAccessToken(data.accessToken);
         console.log("✅ AccessToken 갱신 성공");
 
@@ -84,14 +103,15 @@ class ApiClient {
           console.log("✅ RefreshToken 갱신 성공");
         }
 
-        return true;
+        return { success: true, shouldLogout: false };
       }
 
-      console.error("응답에 accessToken이 없습니다:", data);
-      return false;
+      console.error("⚠️ 응답에 accessToken이 없습니다:", data);
+      return { success: false, shouldLogout: false };
     } catch (error) {
-      console.error("토큰 갱신 중 예외 발생:", error);
-      return false;
+      console.error("⚠️ 토큰 갱신 중 예외 발생 (네트워크 오류):", error);
+      // 네트워크 오류는 로그아웃하지 않음
+      return { success: false, shouldLogout: false };
     }
   }
 
@@ -119,12 +139,12 @@ class ApiClient {
       // accessToken이 없으면 refreshToken으로 갱신 시도
       if (!accessToken) {
         console.log("🔄 AccessToken이 없어서 refreshToken으로 갱신 시도");
-        const refreshSuccess = await this.refreshToken();
-        if (refreshSuccess) {
+        const refreshResult = await this.refreshToken();
+        if (refreshResult.success) {
           accessToken = tokenManager.getAccessToken();
-        } else {
-          // 토큰 갱신 실패 시 로그인 필요
-          console.error("토큰 갱신 실패 - 로그인 필요");
+        } else if (refreshResult.shouldLogout) {
+          // 리프레시 토큰이 만료된 경우에만 로그아웃
+          console.error("❌ 리프레시 토큰 만료 - 로그인 필요");
           tokenManager.clearTokens();
           if (typeof window !== "undefined") {
             window.location.href = "/login";
@@ -133,6 +153,14 @@ class ApiClient {
             success: false,
             error: "인증이 만료되었습니다. 다시 로그인해주세요.",
             statusCode: 401,
+          };
+        } else {
+          // 일시적 오류인 경우 에러만 반환 (로그아웃 X)
+          console.warn("⚠️ 토큰 갱신 일시 실패 - 재시도 가능");
+          return {
+            success: false,
+            error: "일시적인 오류가 발생했습니다. 다시 시도해주세요.",
+            statusCode: 503,
           };
         }
       }
@@ -156,9 +184,9 @@ class ApiClient {
       // 401 에러 처리 (토큰 만료)
       if (response.status === 401 && requireAuth) {
         console.log("🔐 401 에러 발생 - 토큰 갱신 시도");
-        const refreshSuccess = await this.refreshToken();
+        const refreshResult = await this.refreshToken();
 
-        if (refreshSuccess) {
+        if (refreshResult.success) {
           // 토큰 갱신 성공 시 원래 요청 재시도
           console.log("✅ 토큰 갱신 성공 - 원래 요청 재시도");
           const newAccessToken = tokenManager.getAccessToken();
@@ -172,21 +200,28 @@ class ApiClient {
 
             return this.parseResponse<T>(retryResponse);
           }
-        } else {
-          // 토큰 갱신 실패 시 로그인 페이지로 리다이렉트
-          console.error("❌ 토큰 갱신 실패 - 로그인 페이지로 이동");
+        } else if (refreshResult.shouldLogout) {
+          // 리프레시 토큰이 만료된 경우에만 로그아웃
+          console.error("❌ 리프레시 토큰 만료 - 로그인 페이지로 이동");
           tokenManager.clearTokens();
           if (typeof window !== "undefined") {
             window.location.href = "/login";
           }
-        }
 
-        // 토큰 갱신 실패 시 에러 반환
-        return {
-          success: false,
-          error: "인증이 만료되었습니다. 다시 로그인해주세요.",
-          statusCode: 401,
-        };
+          return {
+            success: false,
+            error: "인증이 만료되었습니다. 다시 로그인해주세요.",
+            statusCode: 401,
+          };
+        } else {
+          // 일시적 오류인 경우 에러만 반환 (로그아웃 X)
+          console.warn("⚠️ 토큰 갱신 일시 실패 - 원래 401 에러 반환");
+          return {
+            success: false,
+            error: "일시적인 오류가 발생했습니다. 다시 시도해주세요.",
+            statusCode: 503,
+          };
+        }
       }
 
       return this.parseResponse<T>(response);

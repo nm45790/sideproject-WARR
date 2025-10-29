@@ -9,7 +9,6 @@ import { authService } from "./utils/auth";
 export default function Home() {
   const router = useRouter();
   const isProduction = process.env.NODE_ENV === "production";
-  const userInfo = authService.getCurrentUserInfo();
 
   const [splashFading, setSplashFading] = useState(isProduction ? false : true);
   const [mainVisible, setMainVisible] = useState(isProduction ? false : true);
@@ -33,14 +32,83 @@ export default function Home() {
 
   // 로그인 상태 체크
   useEffect(() => {
-    if (userInfo) {
-      if (userInfo.role === "ACADEMY") {
-        router.push("/academy");
-      } else if (userInfo.role === "TEMP_ACADEMY") {
-        router.push("/signup/academy/onboarding");
+    const checkAndRedirect = async () => {
+      let userInfo = authService.getCurrentUserInfo();
+      const { tokenManager } = await import("./utils/cookies");
+      const hasAccessToken = !!tokenManager.getAccessToken();
+      const hasRefreshToken = !!tokenManager.getRefreshToken();
+
+      console.log("🔍 [메인 페이지] 토큰 상태:", {
+        hasAccessToken,
+        hasRefreshToken,
+        hasUserInfo: !!userInfo,
+      });
+
+      // 1. 액세스 토큰 + user_info 있으면 바로 리다이렉트
+      if (userInfo && hasAccessToken) {
+        console.log("✅ [조건1] 토큰과 사용자 정보 있음 - 자동 이동");
+        redirectByRole(userInfo.role);
+        return;
       }
-    }
-  }, []);
+
+      // 2. 액세스 토큰 있고 user_info 없으면 → 토큰에서 role 추출해서 자동 로그인
+      if (!userInfo && hasAccessToken) {
+        console.log(
+          "🔄 [조건2] 토큰은 있지만 user_info 없음 - 토큰에서 정보 추출",
+        );
+        const tokenInfo = authService.getUserInfoFromToken();
+        if (tokenInfo) {
+          console.log(
+            "✅ 토큰에서 role 추출 성공 - 자동 이동:",
+            tokenInfo.role,
+          );
+          redirectByRole(tokenInfo.role);
+          return;
+        }
+      }
+
+      // 3. 액세스 토큰 없고 리프레시 토큰만 있으면 → 토큰 갱신 후 사용자 정보 조회
+      if (!hasAccessToken && hasRefreshToken) {
+        console.log("🔄 [조건3] 리프레시 토큰만 있음 - 토큰 갱신 시도");
+        const refreshResult = await authService.refreshToken();
+
+        if (refreshResult.success) {
+          console.log("✅ 토큰 갱신 성공 - 사용자 정보 조회 중...");
+
+          // 토큰 갱신 후 사용자 정보 조회 API 호출
+          const userResult = await authService.getCurrentUser();
+
+          if (userResult.success && userResult.data) {
+            console.log("✅ 사용자 정보 조회 성공 - 자동 이동");
+            redirectByRole(userResult.data.role);
+            return;
+          } else {
+            console.error("❌ 사용자 정보 조회 실패 - 로그인 필요");
+            authService.logout();
+          }
+        } else {
+          console.error("❌ 토큰 갱신 실패 - 로그인 필요");
+          authService.logout();
+        }
+      }
+    };
+
+    const redirectByRole = (role: string) => {
+      if (role === "USER") {
+        router.push("/parent");
+      } else if (role === "ACADEMY") {
+        router.push("/academy");
+      } else if (role === "TEMP") {
+        router.push("/signup/role");
+      } else if (role === "TEMP_ACADEMY") {
+        router.push("/signup/academy/onboarding");
+      } else if (role === "TEMP_USER") {
+        router.push("/signup/parent/onboarding");
+      }
+    };
+
+    checkAndRedirect();
+  }, [router]);
 
   return (
     <>

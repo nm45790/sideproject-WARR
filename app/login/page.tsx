@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import MainContainer from "../components/MainContainer";
 import Icons from "../components/Icons";
@@ -23,6 +23,93 @@ export default function LoginPage() {
   const [isPasswordFocused, setIsPasswordFocused] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+
+  // 앱 기반: 토큰이 있으면 자동 로그인 처리
+  useEffect(() => {
+    const checkAndRedirect = async () => {
+      let userInfo = authService.getCurrentUserInfo();
+      const { tokenManager } = await import("../utils/cookies");
+      const hasAccessToken = !!tokenManager.getAccessToken();
+      const hasRefreshToken = !!tokenManager.getRefreshToken();
+
+      console.log("🔍 [로그인 페이지] 토큰 상태:", {
+        hasAccessToken,
+        hasRefreshToken,
+        hasUserInfo: !!userInfo,
+      });
+
+      // 1. 액세스 토큰 + user_info 있으면 바로 리다이렉트
+      if (userInfo && hasAccessToken) {
+        console.log("✅ [조건1] 이미 로그인된 사용자 - 자동 이동:", userInfo);
+        redirectByRole(userInfo.role);
+        return;
+      }
+
+      // 2. 액세스 토큰 있고 user_info 없으면 → 토큰에서 role 추출해서 자동 로그인
+      if (!userInfo && hasAccessToken) {
+        console.log(
+          "🔄 [조건2] 토큰은 있지만 user_info 없음 - 토큰에서 정보 추출",
+        );
+        const tokenInfo = authService.getUserInfoFromToken();
+        if (tokenInfo) {
+          console.log(
+            "✅ 토큰에서 role 추출 성공 - 자동 이동:",
+            tokenInfo.role,
+          );
+          redirectByRole(tokenInfo.role);
+          return;
+        }
+      }
+
+      // 3. 액세스 토큰 없고 리프레시 토큰만 있으면 → 토큰 갱신 후 사용자 정보 조회
+      if (!hasAccessToken && hasRefreshToken) {
+        console.log("🔄 [조건3] 리프레시 토큰만 있음 - 토큰 갱신 시도");
+        setIsLoading(true);
+
+        const refreshResult = await authService.refreshToken();
+
+        if (refreshResult.success) {
+          console.log("✅ 토큰 갱신 성공 - 사용자 정보 조회 중...");
+
+          // 토큰 갱신 후 사용자 정보 조회 API 호출
+          const userResult = await authService.getCurrentUser();
+
+          if (userResult.success && userResult.data) {
+            console.log("✅ 사용자 정보 조회 성공 - 자동 이동");
+            redirectByRole(userResult.data.role);
+            setIsLoading(false);
+            return;
+          } else {
+            console.error("❌ 사용자 정보 조회 실패 - 로그인 페이지 유지");
+            const { tokenManager } = await import("../utils/cookies");
+            tokenManager.clearTokens();
+          }
+        } else {
+          console.error("❌ 토큰 갱신 실패 - 로그인 페이지 유지");
+          const { tokenManager } = await import("../utils/cookies");
+          tokenManager.clearTokens();
+        }
+
+        setIsLoading(false);
+      }
+    };
+
+    const redirectByRole = (role: string) => {
+      if (role === "USER") {
+        router.replace("/parent");
+      } else if (role === "ACADEMY") {
+        router.replace("/academy");
+      } else if (role === "TEMP") {
+        router.replace("/signup/role");
+      } else if (role === "TEMP_ACADEMY") {
+        router.replace("/signup/academy/onboarding");
+      } else if (role === "TEMP_USER") {
+        router.replace("/signup/parent/onboarding");
+      }
+    };
+
+    checkAndRedirect();
+  }, [router]);
 
   const handleLogin = async () => {
     if (!id.trim() || !password.trim()) {
