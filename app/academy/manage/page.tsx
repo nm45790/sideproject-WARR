@@ -1,221 +1,290 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import MainContainer from "../../components/MainContainer";
-import Splash from "../../components/Splash";
 import { useRouter } from "next/navigation";
+import MainContainer from "../../components/MainContainer";
+import Icons from "../../components/Icons";
 import { useAuth } from "../../components/CombinedProvider";
+import { api } from "../../utils/api";
+import { getChosung, isChosungSearch } from "../../utils/search";
 
-export default function Academy() {
+interface Enrollment {
+  enrollmentId: number;
+  academyId: number;
+  petId: number;
+  petName: string;
+  petGender: string;
+  petBreed: string;
+  status: string;
+  startDate: string;
+  endDate: string;
+  petImage: string | null;
+}
+
+const AcademyManagePage = () => {
   const router = useRouter();
-  const isProduction = process.env.NODE_ENV === "production";
   const userInfo = useAuth();
+  const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
+  const [filteredEnrollments, setFilteredEnrollments] = useState<Enrollment[]>(
+    [],
+  );
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
-  const [splashFading, setSplashFading] = useState(isProduction ? false : true);
-  const [mainVisible, setMainVisible] = useState(isProduction ? false : true);
+  // 등록된 반려동물 목록 조회
+  const fetchEnrollments = async () => {
+    if (!userInfo?.academyId) return;
 
-  // 임시 데이터
-  const totalDogs = 6;
-  const currentDate = "2025.09.08 월요일";
+    try {
+      setIsLoading(true);
+      const response = await api.get(
+        `/api/v1/enrollments/${userInfo.academyId}`,
+      );
 
-  useEffect(() => {
-    if (isProduction) {
-      const fadeOutTimer = setTimeout(() => {
-        setSplashFading(true);
-      }, 900);
+      console.log("🐕 등록된 반려동물 API 응답:", response);
 
-      const mainTimer = setTimeout(() => {
-        setMainVisible(true);
-      }, 1000);
-
-      return () => {
-        clearTimeout(fadeOutTimer);
-        clearTimeout(mainTimer);
-      };
+      if (response.success && response.data && (response.data as any).data) {
+        const enrollmentsData = (response.data as any).data as Enrollment[];
+        console.log("🐕 파싱된 등록 정보:", enrollmentsData);
+        setEnrollments(enrollmentsData);
+        setFilteredEnrollments(enrollmentsData);
+      } else {
+        setEnrollments([]);
+        setFilteredEnrollments([]);
+      }
+    } catch (error) {
+      console.error("등록 정보 조회 실패:", error);
+      setEnrollments([]);
+      setFilteredEnrollments([]);
+    } finally {
+      setIsLoading(false);
     }
-  }, [isProduction]);
+  };
+
+  // 검색 필터링 (초성 검색 포함)
+  useEffect(() => {
+    if (searchQuery.trim() === "") {
+      setFilteredEnrollments(enrollments);
+    } else {
+      const query = searchQuery.trim();
+
+      // 초성 검색인 경우
+      if (isChosungSearch(query)) {
+        const filtered = enrollments.filter((enrollment) => {
+          const nameChosung = getChosung(enrollment.petName);
+          return nameChosung.startsWith(query);
+        });
+        setFilteredEnrollments(filtered);
+      } else {
+        // 일반 검색 (이름에 포함된 경우)
+        const filtered = enrollments.filter((enrollment) =>
+          enrollment.petName.toLowerCase().includes(query.toLowerCase()),
+        );
+        setFilteredEnrollments(filtered);
+      }
+    }
+  }, [searchQuery, enrollments]);
+
+  // 초기 데이터 조회
+  useEffect(() => {
+    if (userInfo?.academyId) {
+      fetchEnrollments();
+    }
+  }, [userInfo?.academyId]);
 
   return (
-    <>
-      {/* 메인 콘텐츠 */}
-      <div
-        className={`transition-all duration-700 ease-out ${
-          mainVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
-        } w-full flex justify-center`}
-      >
-        <MainContainer bg="#f3f4f9">
-          <div className="relative w-full min-h-dvh">
-            {/* 인사말 및 아카데미 이름 */}
-            <div className="pt-[73px]">
-              <p className="font-bold text-[#363e4a] text-[20px] leading-[24px]">
-                안녕하세요!
-              </p>
-              <div className="flex items-center gap-[5px] mt-[27px]">
-                <div className="bg-[#3f59ff] rounded-[7px] px-[8px] py-[5px]">
-                  <p className="font-bold text-white text-[20px] leading-[24px]">
-                    {userInfo?.name || "보호자"}
-                  </p>
+    <MainContainer bg="#ffffff" noPadding>
+      <div className="w-full min-h-dvh">
+        {/* 상단 헤더 */}
+        <div className="bg-white">
+          {/* 뒤로가기 버튼 */}
+          <div className="pt-[73px] px-[20px] pb-[20px]">
+            <button
+              onClick={() => router.back()}
+              className="hover:opacity-70 transition-opacity"
+            >
+              <Icons.Prev className="w-[26px] h-[22px]" />
+            </button>
+          </div>
+
+          {/* 아이콘 + 제목 + 원생 수 */}
+          <div className="px-[20px] pb-[8px]">
+            <div className="flex items-center justify-between">
+              {/* 왼쪽: 아이콘 + 제목 */}
+              <div className="flex items-center gap-[12px]">
+                <div className="w-[52px] h-[52px] bg-gradient-to-br from-[#4dd5c5] to-[#2bb8a7] rounded-[10px] flex items-center justify-center">
+                  <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+                    <path
+                      d="M14 2L16 8L22 10L16 12L14 18L12 12L6 10L12 8L14 2Z"
+                      fill="white"
+                    />
+                    <path
+                      d="M8 18L9 21L12 22L9 23L8 26L7 23L4 22L7 21L8 18Z"
+                      fill="white"
+                    />
+                    <path
+                      d="M20 18L21 21L24 22L21 23L20 26L19 23L16 22L19 21L20 18Z"
+                      fill="white"
+                    />
+                  </svg>
                 </div>
-                <p className="font-bold text-[#363e4a] text-[20px] leading-[24px]">
-                  선생님! 👋
-                </p>
-              </div>
-            </div>
-
-            {/* 날짜 표시 */}
-            <div className="mt-[37px] bg-white rounded-[7px] inline-flex items-center gap-[9px] h-[40px] pl-[12px] pr-[12px]">
-              <div className="w-[9px] h-[10px]">
-                <svg
-                  width="9"
-                  height="10"
-                  viewBox="0 0 9 10"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M9 9V2C9 1.4485 8.5515 1 8 1H7V0H6V1H3V0H2V1H1C0.4485 1 0 1.4485 0 2V9C0 9.5515 0.4485 10 1 10H8C8.5515 10 9 9.5515 9 9ZM3 8H2V7H3V8ZM3 6H2V5H3V6ZM5 8H4V7H5V8ZM5 6H4V5H5V6ZM7 8H6V7H7V8ZM7 6H6V5H7V6ZM8 3.5H1V2.5H8V3.5Z"
-                    fill="#858585"
-                  />
-                </svg>
-              </div>
-              <p className="font-semibold text-[#858585] text-[14px] leading-[17px]">
-                {currentDate}
-              </p>
-            </div>
-
-            {/* 등원 현황 카드 */}
-            <div className="mt-[8px] bg-white rounded-[7px] shadow-[0px_1px_3px_0px_rgba(0,0,0,0.1)] h-[200px] relative">
-              {/* 상단 안내문구 */}
-              <div className="absolute top-[15px] left-[15px] flex items-center gap-[8px]">
-                <div className="w-[4px] h-[4px] rounded-full bg-[#858585]" />
-                <p className="font-medium text-[#858585] text-[12px] leading-[14px]">
-                  보호자가 등원 신청하면 바로 확인 가능해요
-                </p>
-              </div>
-
-              {/* 총 마리수 */}
-              <div className="absolute top-[61px] left-1/2 -translate-x-1/2">
-                <p className="font-bold text-[#363e4a] text-[55px] leading-[54px] text-center">
-                  {totalDogs}
-                </p>
-              </div>
-
-              {/* 마리 텍스트 */}
-              <div className="absolute top-[122px] left-1/2 -translate-x-1/2">
                 <p className="font-bold text-[#363e4a] text-[20px] leading-[normal]">
+                  아이들 관리
+                </p>
+              </div>
+
+              {/* 오른쪽: 원생 수 */}
+              <div className="flex items-end gap-[4px]">
+                <p className="font-bold text-[#363e4a] text-[30px] leading-[30px]">
+                  {enrollments.length}
+                </p>
+                <p className="font-bold text-[#363e4a] text-[20px] leading-[20px] pb-[2px]">
                   마리
                 </p>
               </div>
-
-              {/* 오늘 배지 */}
-              <div className="absolute top-[152px] left-1/2 -translate-x-1/2 bg-[#f9f0fb] rounded-[7px] px-[10px] py-[5px]">
-                <p className="font-bold text-[#a052ff] text-[12px] leading-[normal]">
-                  오늘
-                </p>
-              </div>
-
-              {/* 화살표 */}
-              <div className="absolute top-[91px] right-[20px]">
-                <svg width="6" height="13" viewBox="0 0 6 13" fill="none">
-                  <path
-                    d="M1 1L5 6.5L1 12"
-                    stroke="#858585"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </div>
-            </div>
-
-            {/* 메뉴 카드 그리드 */}
-            <div className="mt-[11px] grid grid-cols-2 gap-x-[11px] gap-y-[11px]">
-              {/* 아이들 관리 */}
-              <button className="bg-white rounded-[7px] shadow-[0px_1px_3px_0px_rgba(0,0,0,0.1)] w-full h-[162px] flex flex-col items-center justify-center hover:bg-gray-50 transition-colors">
-                <div className="w-[52px] h-[52px] mb-[6px]">
-                  <div className="w-full h-full bg-gradient-to-br from-[#4fd1c5] to-[#38b2ac] rounded-full flex items-center justify-center">
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
-                      <path
-                        d="M16 21V19C16 17.9391 15.5786 16.9217 14.8284 16.1716C14.0783 15.4214 13.0609 15 12 15H5C3.93913 15 2.92172 15.4214 2.17157 16.1716C1.42143 16.9217 1 17.9391 1 19V21"
-                        stroke="white"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                      <circle
-                        cx="8.5"
-                        cy="7"
-                        r="4"
-                        stroke="white"
-                        strokeWidth="2"
-                      />
-                      <path
-                        d="M20 8V14M17 11H23"
-                        stroke="white"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                      />
-                    </svg>
-                  </div>
-                </div>
-                <p className="font-semibold text-[#363e4a] text-[14px] leading-[normal]">
-                  아이들 관리
-                </p>
-              </button>
-
-              {/* 유치원 설정 */}
-              <button className="bg-white rounded-[7px] shadow-[0px_1px_3px_0px_rgba(0,0,0,0.1)] w-full h-[162px] flex flex-col items-center justify-center hover:bg-gray-50 transition-colors">
-                <div className="w-[52px] h-[52px] mb-[6px]">
-                  <div className="w-full h-full bg-gradient-to-br from-[#f687b3] to-[#ed64a6] rounded-full flex items-center justify-center">
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
-                      <path
-                        d="M3 21H21M4 21V9L12 3L20 9V21M9 21V15H15V21"
-                        stroke="white"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                  </div>
-                </div>
-                <p className="font-semibold text-[#363e4a] text-[14px] leading-[normal]">
-                  유치원 설정
-                </p>
-              </button>
-
-              {/* 승인 관리 */}
-              <button className="bg-white rounded-[7px] shadow-[0px_1px_3px_0px_rgba(0,0,0,0.1)] w-full h-[162px] flex flex-col items-center justify-center hover:bg-gray-50 transition-colors">
-                <div className="w-[52px] h-[52px] mb-[6px]">
-                  <div className="w-full h-full bg-gradient-to-br from-[#fc8181] to-[#f56565] rounded-full flex items-center justify-center">
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
-                      <path
-                        d="M9 12L11 14L15 10M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z"
-                        stroke="white"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                  </div>
-                </div>
-                <p className="font-semibold text-[#363e4a] text-[14px] leading-[normal]">
-                  승인 관리
-                </p>
-              </button>
             </div>
           </div>
-        </MainContainer>
-      </div>
 
-      {/* 스플래시 오버레이 */}
-      <div
-        className={`fixed inset-0 z-50 transition-opacity duration-500 ease-out ${
-          splashFading ? "opacity-0" : "opacity-100"
-        }`}
-        style={{ pointerEvents: splashFading ? "none" : "auto" }}
-      >
-        <Splash />
+          {/* 설명 */}
+          <div className="px-[20px] pb-[14px]">
+            <p className="font-medium text-[#6e7783] text-[12px] leading-[normal]">
+              모든 원생을 한눈에 확인하고 관리하세요.
+            </p>
+          </div>
+
+          {/* 검색 인풋 */}
+          {/* TODO: 스티키 구현 */}
+          <div className="px-[20px] pb-[20px]">
+            <div className="relative">
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="이름을 입력해주세요"
+                className="w-full h-[59px] border border-[#d2d2d2] rounded-[7px] px-[20px] text-[16px] font-medium text-[#363e4a] placeholder:text-[#b4b4b4] focus:outline-none focus:border-[#3f55ff]"
+              />
+              <svg
+                className="absolute right-[20px] top-[50%] translate-y-[-50%] pointer-events-none"
+                width="20"
+                height="20"
+                viewBox="0 0 20 20"
+                fill="none"
+              >
+                <circle cx="9" cy="9" r="6" stroke="#b4b4b4" strokeWidth="2" />
+                <path
+                  d="M14 14L17 17"
+                  stroke="#b4b4b4"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                />
+              </svg>
+            </div>
+          </div>
+
+          {/* 구분선 */}
+          <div className="w-full h-[1px] bg-[#d2d6db]" />
+        </div>
+
+        {/* 강아지 리스트 */}
+        <div className="px-[20px] mt-[20px] space-y-[3px] pb-[24px]">
+          {isLoading ? (
+            <div className="flex items-center justify-center py-[60px]">
+              <p className="text-[#858585] text-[14px]">로딩 중...</p>
+            </div>
+          ) : filteredEnrollments.length === 0 ? (
+            <div className="bg-white py-[60px] flex flex-col items-center justify-center">
+              <p className="font-medium text-[#858585] text-[14px] leading-[17px]">
+                {searchQuery
+                  ? "검색 결과가 없습니다"
+                  : "등록된 원생이 없습니다"}
+              </p>
+            </div>
+          ) : (
+            filteredEnrollments.map((enrollment) => (
+              <div
+                key={enrollment.enrollmentId}
+                onClick={() =>
+                  router.push(`/academy/petdetail?petId=${enrollment.petId}`)
+                }
+                className="bg-white rounded-[7px] h-[68px] flex items-center px-[10px] gap-[6px] cursor-pointer hover:bg-gray-50 transition-colors"
+              >
+                {/* 강아지 이미지 */}
+                <div className="w-[50px] h-[50px] rounded-full bg-[#e5e5e5] flex items-center justify-center flex-shrink-0 overflow-hidden">
+                  {enrollment.petImage ? (
+                    <img
+                      src={enrollment.petImage}
+                      alt={enrollment.petName}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+                      <circle cx="14" cy="14" r="14" fill="#D9D9D9" />
+                      <path
+                        d="M14 13C16.2091 13 18 11.2091 18 9C18 6.79086 16.2091 5 14 5C11.7909 5 10 6.79086 10 9C10 11.2091 11.7909 13 14 13Z"
+                        fill="white"
+                      />
+                      <path
+                        d="M20 23V21C20 19.9391 19.5786 18.9217 18.8284 18.1716C18.0783 17.4214 17.0609 17 16 17H12C10.9391 17 9.92172 17.4214 9.17157 18.1716C8.42143 18.9217 8 19.9391 8 21V23"
+                        stroke="white"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                      />
+                    </svg>
+                  )}
+                </div>
+
+                {/* 강아지 정보 */}
+                <div className="flex flex-col gap-[4px]">
+                  <div className="flex items-center gap-[4px]">
+                    <p className="font-bold text-[#363e4a] text-[18px] leading-[normal]">
+                      {enrollment.petName}
+                    </p>
+                    {/* 성별 아이콘 */}
+                    {enrollment.petGender === "MALE" ? (
+                      <svg
+                        width="20"
+                        height="20"
+                        viewBox="0 0 20 20"
+                        fill="none"
+                      >
+                        <circle cx="10" cy="10" r="10" fill="#3F55FF" />
+                        <path
+                          d="M13 7L13 10M13 7L10 7M13 7L10 10M10 10C9.07003 10.9722 7.5 11.0833 7.5 11.0833C6.5 11.0833 5.91667 12.1944 5.91667 13.25C5.91667 14.3056 6.5 15 7.5 15C8.5 15 9.08333 14.3056 9.08333 13.25"
+                          stroke="white"
+                          strokeWidth="1.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    ) : enrollment.petGender === "FEMALE" ? (
+                      <svg
+                        width="20"
+                        height="20"
+                        viewBox="0 0 20 20"
+                        fill="none"
+                      >
+                        <circle cx="10" cy="10" r="10" fill="#FF3F7F" />
+                        <path
+                          d="M10 14V16M10 14C11.1046 14 12 13.1046 12 12C12 10.8954 11.1046 10 10 10M10 14C8.89543 14 8 13.1046 8 12C8 10.8954 8.89543 10 10 10M10 10V7M8 16H12"
+                          stroke="white"
+                          strokeWidth="1.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    ) : null}
+                  </div>
+                  <p className="font-medium text-[#6e7783] text-[12px] leading-[normal]">
+                    {enrollment.petBreed}
+                  </p>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
       </div>
-    </>
+    </MainContainer>
   );
-}
+};
+
+export default AcademyManagePage;

@@ -8,11 +8,12 @@ import DatePickerModal from "../components/DatePickerModal";
 import { useAuth } from "../components/CombinedProvider";
 import { api } from "../utils/api";
 import { formatApiDate, formatDate } from "../utils/date";
+import { useRouter } from "next/navigation";
 
 export default function Academy() {
   const isProduction = process.env.NODE_ENV === "production";
   const userInfo = useAuth();
-
+  const router = useRouter();
   const [splashFading, setSplashFading] = useState(isProduction ? false : true);
   const [mainVisible, setMainVisible] = useState(isProduction ? false : true);
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -222,7 +223,10 @@ export default function Academy() {
             {/* TODO: 아이콘 -> 이미지로 수정하기 */}
             <div className="mt-[11px] grid grid-cols-2 gap-x-[11px] gap-y-[11px]">
               {/* 아이들 관리 */}
-              <button className="bg-white rounded-[7px] shadow-[0px_1px_3px_0px_rgba(0,0,0,0.1)] w-full h-[162px] flex flex-col items-center justify-center hover:bg-gray-50 transition-colors">
+              <button
+                onClick={() => router.push("/academy/manage")}
+                className="bg-white rounded-[7px] shadow-[0px_1px_3px_0px_rgba(0,0,0,0.1)] w-full h-[162px] flex flex-col items-center justify-center hover:bg-gray-50 transition-colors"
+              >
                 <div className="w-[52px] h-[52px] mb-[6px]">
                   <div className="w-full h-full bg-gradient-to-br from-[#4fd1c5] to-[#38b2ac] rounded-full flex items-center justify-center">
                     <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
@@ -255,7 +259,10 @@ export default function Academy() {
               </button>
 
               {/* 유치원 설정 */}
-              <button className="bg-white rounded-[7px] shadow-[0px_1px_3px_0px_rgba(0,0,0,0.1)] w-full h-[162px] flex flex-col items-center justify-center hover:bg-gray-50 transition-colors">
+              <button
+                onClick={() => router.push("/academy/setting")}
+                className="bg-white rounded-[7px] shadow-[0px_1px_3px_0px_rgba(0,0,0,0.1)] w-full h-[162px] flex flex-col items-center justify-center hover:bg-gray-50 transition-colors"
+              >
                 <div className="w-[52px] h-[52px] mb-[6px]">
                   <div className="w-full h-full bg-gradient-to-br from-[#f687b3] to-[#ed64a6] rounded-full flex items-center justify-center">
                     <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
@@ -275,7 +282,10 @@ export default function Academy() {
               </button>
 
               {/* 승인 관리 */}
-              <button className="bg-white rounded-[7px] shadow-[0px_1px_3px_0px_rgba(0,0,0,0.1)] w-full h-[162px] flex flex-col items-center justify-center hover:bg-gray-50 transition-colors">
+              <button
+                onClick={() => router.push("/academy/accept")}
+                className="bg-white rounded-[7px] shadow-[0px_1px_3px_0px_rgba(0,0,0,0.1)] w-full h-[162px] flex flex-col items-center justify-center hover:bg-gray-50 transition-colors"
+              >
                 <div className="w-[52px] h-[52px] mb-[6px]">
                   <div className="w-full h-full bg-gradient-to-br from-[#fc8181] to-[#f56565] rounded-full flex items-center justify-center">
                     <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
