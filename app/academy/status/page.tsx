@@ -136,9 +136,7 @@ const AcademyStatusPage = () => {
               <div
                 key={reservation.id}
                 onClick={() =>
-                  router.push(
-                    `/academy/status/detail?petId=${reservation.petId}`,
-                  )
+                  router.push(`/academy/petdetail?petId=${reservation.petId}`)
                 }
                 className="bg-white rounded-[7px] h-[68px] flex items-center px-[10px] gap-[6px] cursor-pointer hover:bg-gray-50 transition-colors"
               >

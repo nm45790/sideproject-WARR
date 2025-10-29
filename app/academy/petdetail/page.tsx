@@ -2,10 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import MainContainer from "../../../components/MainContainer";
-import Icons from "../../../components/Icons";
-import { useAuth } from "../../../components/CombinedProvider";
-import { api } from "../../../utils/api";
+import MainContainer from "../../components/MainContainer";
+import Icons from "../../components/Icons";
+import { useAuth } from "../../components/CombinedProvider";
+import { api } from "../../utils/api";
 
 interface PetDetail {
   id: number;
