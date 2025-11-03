@@ -1,221 +1,170 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import MainContainer from "../../components/MainContainer";
-import Splash from "../../components/Splash";
 import { useRouter } from "next/navigation";
+import MainContainer from "../../components/MainContainer";
+import Icons from "../../components/Icons";
 import { useAuth } from "../../components/CombinedProvider";
+import { api } from "../../utils/api";
 
-export default function Academy() {
+interface Enrollment {
+  enrollmentId: number;
+  academyId: number;
+  petId: number;
+  petName: string;
+  petGender: "MALE" | "FEMALE";
+  petBreed: string;
+  status: string;
+  startDate: string;
+  endDate: string;
+  petImage: string | null;
+}
+
+interface ApiResponse {
+  code: number;
+  data: Enrollment[];
+}
+
+export default function AcceptPage() {
   const router = useRouter();
-  const isProduction = process.env.NODE_ENV === "production";
   const userInfo = useAuth();
+  const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const [splashFading, setSplashFading] = useState(isProduction ? false : true);
-  const [mainVisible, setMainVisible] = useState(isProduction ? false : true);
+  // 대기 중인 등록 신청 조회
+  const fetchEnrollments = async () => {
+    if (!userInfo?.academyId) return;
 
-  // 임시 데이터
-  const totalDogs = 6;
-  const currentDate = "2025.09.08 월요일";
+    try {
+      setIsLoading(true);
+      const response = await api.get(
+        `/api/v1/enrollments/${userInfo.academyId}/waiting`,
+      );
+
+      if (response.success && response.data) {
+        const apiData = (response.data as any).data || [];
+        setEnrollments(apiData as Enrollment[]);
+      } else {
+        setEnrollments([]);
+      }
+    } catch (error) {
+      console.error("등록 신청 조회 실패:", error);
+      setEnrollments([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    if (isProduction) {
-      const fadeOutTimer = setTimeout(() => {
-        setSplashFading(true);
-      }, 900);
-
-      const mainTimer = setTimeout(() => {
-        setMainVisible(true);
-      }, 1000);
-
-      return () => {
-        clearTimeout(fadeOutTimer);
-        clearTimeout(mainTimer);
-      };
+    if (userInfo?.academyId) {
+      fetchEnrollments();
     }
-  }, [isProduction]);
+  }, [userInfo?.academyId]);
 
   return (
-    <>
-      {/* 메인 콘텐츠 */}
-      <div
-        className={`transition-all duration-700 ease-out ${
-          mainVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
-        } w-full flex justify-center`}
-      >
-        <MainContainer bg="#f3f4f9">
-          <div className="relative w-full min-h-dvh">
-            {/* 인사말 및 아카데미 이름 */}
-            <div className="pt-[73px]">
-              <p className="font-bold text-[#363e4a] text-[20px] leading-[24px]">
-                안녕하세요!
-              </p>
-              <div className="flex items-center gap-[5px] mt-[27px]">
-                <div className="bg-[#3f59ff] rounded-[7px] px-[8px] py-[5px]">
-                  <p className="font-bold text-white text-[20px] leading-[24px]">
-                    {userInfo?.name || "보호자"}
-                  </p>
-                </div>
-                <p className="font-bold text-[#363e4a] text-[20px] leading-[24px]">
-                  선생님! 👋
-                </p>
-              </div>
-            </div>
+    <MainContainer bg="#ffffff" noPadding>
+      <div className="w-full min-h-dvh">
+        {/* 뒤로가기 버튼 */}
+        <div className="pt-[73px] px-[20px]">
+          <button
+            onClick={() => router.back()}
+            className="hover:opacity-70 transition-opacity"
+          >
+            <Icons.Prev className="w-[26px] h-[22px]" />
+          </button>
+        </div>
 
-            {/* 날짜 표시 */}
-            <div className="mt-[37px] bg-white rounded-[7px] inline-flex items-center gap-[9px] h-[40px] pl-[12px] pr-[12px]">
-              <div className="w-[9px] h-[10px]">
-                <svg
-                  width="9"
-                  height="10"
-                  viewBox="0 0 9 10"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M9 9V2C9 1.4485 8.5515 1 8 1H7V0H6V1H3V0H2V1H1C0.4485 1 0 1.4485 0 2V9C0 9.5515 0.4485 10 1 10H8C8.5515 10 9 9.5515 9 9ZM3 8H2V7H3V8ZM3 6H2V5H3V6ZM5 8H4V7H5V8ZM5 6H4V5H5V6ZM7 8H6V7H7V8ZM7 6H6V5H7V6ZM8 3.5H1V2.5H8V3.5Z"
-                    fill="#858585"
-                  />
-                </svg>
-              </div>
-              <p className="font-semibold text-[#858585] text-[14px] leading-[17px]">
-                {currentDate}
-              </p>
-            </div>
-
-            {/* 등원 현황 카드 */}
-            <div className="mt-[8px] bg-white rounded-[7px] shadow-[0px_1px_3px_0px_rgba(0,0,0,0.1)] h-[200px] relative">
-              {/* 상단 안내문구 */}
-              <div className="absolute top-[15px] left-[15px] flex items-center gap-[8px]">
-                <div className="w-[4px] h-[4px] rounded-full bg-[#858585]" />
-                <p className="font-medium text-[#858585] text-[12px] leading-[14px]">
-                  보호자가 등원 신청하면 바로 확인 가능해요
-                </p>
-              </div>
-
-              {/* 총 마리수 */}
-              <div className="absolute top-[61px] left-1/2 -translate-x-1/2">
-                <p className="font-bold text-[#363e4a] text-[55px] leading-[54px] text-center">
-                  {totalDogs}
-                </p>
-              </div>
-
-              {/* 마리 텍스트 */}
-              <div className="absolute top-[122px] left-1/2 -translate-x-1/2">
-                <p className="font-bold text-[#363e4a] text-[20px] leading-[normal]">
-                  마리
-                </p>
-              </div>
-
-              {/* 오늘 배지 */}
-              <div className="absolute top-[152px] left-1/2 -translate-x-1/2 bg-[#f9f0fb] rounded-[7px] px-[10px] py-[5px]">
-                <p className="font-bold text-[#a052ff] text-[12px] leading-[normal]">
-                  오늘
-                </p>
-              </div>
-
-              {/* 화살표 */}
-              <div className="absolute top-[91px] right-[20px]">
-                <svg width="6" height="13" viewBox="0 0 6 13" fill="none">
-                  <path
-                    d="M1 1L5 6.5L1 12"
-                    stroke="#858585"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </div>
-            </div>
-
-            {/* 메뉴 카드 그리드 */}
-            <div className="mt-[11px] grid grid-cols-2 gap-x-[11px] gap-y-[11px]">
-              {/* 아이들 관리 */}
-              <button className="bg-white rounded-[7px] shadow-[0px_1px_3px_0px_rgba(0,0,0,0.1)] w-full h-[162px] flex flex-col items-center justify-center hover:bg-gray-50 transition-colors">
-                <div className="w-[52px] h-[52px] mb-[6px]">
-                  <div className="w-full h-full bg-gradient-to-br from-[#4fd1c5] to-[#38b2ac] rounded-full flex items-center justify-center">
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
-                      <path
-                        d="M16 21V19C16 17.9391 15.5786 16.9217 14.8284 16.1716C14.0783 15.4214 13.0609 15 12 15H5C3.93913 15 2.92172 15.4214 2.17157 16.1716C1.42143 16.9217 1 17.9391 1 19V21"
-                        stroke="white"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                      <circle
-                        cx="8.5"
-                        cy="7"
-                        r="4"
-                        stroke="white"
-                        strokeWidth="2"
-                      />
-                      <path
-                        d="M20 8V14M17 11H23"
-                        stroke="white"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                      />
-                    </svg>
-                  </div>
-                </div>
-                <p className="font-semibold text-[#363e4a] text-[14px] leading-[normal]">
-                  아이들 관리
-                </p>
-              </button>
-
-              {/* 유치원 설정 */}
-              <button className="bg-white rounded-[7px] shadow-[0px_1px_3px_0px_rgba(0,0,0,0.1)] w-full h-[162px] flex flex-col items-center justify-center hover:bg-gray-50 transition-colors">
-                <div className="w-[52px] h-[52px] mb-[6px]">
-                  <div className="w-full h-full bg-gradient-to-br from-[#f687b3] to-[#ed64a6] rounded-full flex items-center justify-center">
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
-                      <path
-                        d="M3 21H21M4 21V9L12 3L20 9V21M9 21V15H15V21"
-                        stroke="white"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                  </div>
-                </div>
-                <p className="font-semibold text-[#363e4a] text-[14px] leading-[normal]">
-                  유치원 설정
-                </p>
-              </button>
-
-              {/* 승인 관리 */}
-              <button className="bg-white rounded-[7px] shadow-[0px_1px_3px_0px_rgba(0,0,0,0.1)] w-full h-[162px] flex flex-col items-center justify-center hover:bg-gray-50 transition-colors">
-                <div className="w-[52px] h-[52px] mb-[6px]">
-                  <div className="w-full h-full bg-gradient-to-br from-[#fc8181] to-[#f56565] rounded-full flex items-center justify-center">
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
-                      <path
-                        d="M9 12L11 14L15 10M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z"
-                        stroke="white"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                  </div>
-                </div>
-                <p className="font-semibold text-[#363e4a] text-[14px] leading-[normal]">
-                  승인 관리
-                </p>
-              </button>
+        {/* 헤더 - 아이콘 + 제목 */}
+        <div className="bg-white px-[20px] pt-[27px] pb-[14px]">
+          <div className="flex items-center gap-[12px] mb-[8px]">
+            <div className="w-[52px] h-[52px] bg-gradient-to-br from-[#ff9966] to-[#ff6633] rounded-[10px] flex items-center justify-center">
+              <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+                <path
+                  d="M14 7V14L18 16M26 14C26 20.6274 20.6274 26 14 26C7.37258 26 2 20.6274 2 14C2 7.37258 7.37258 2 14 2C20.6274 2 26 7.37258 26 14Z"
+                  stroke="white"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
             </div>
           </div>
-        </MainContainer>
-      </div>
+          <p className="font-bold text-[#363e4a] text-[20px] leading-[normal]">
+            승인 관리
+          </p>
+        </div>
 
-      {/* 스플래시 오버레이 */}
-      <div
-        className={`fixed inset-0 z-50 transition-opacity duration-500 ease-out ${
-          splashFading ? "opacity-0" : "opacity-100"
-        }`}
-        style={{ pointerEvents: splashFading ? "none" : "auto" }}
-      >
-        <Splash />
+        {/* 구분선 */}
+        <div className="w-full h-[1px] bg-[#d2d6db]" />
+
+        {/* 강아지 리스트 */}
+        <div className="px-[20px] mt-[20px] space-y-[3px] pb-[24px]">
+          {isLoading ? (
+            <div className="flex items-center justify-center py-[60px]">
+              <p className="text-[#858585] text-[14px]">로딩 중...</p>
+            </div>
+          ) : enrollments.length === 0 ? (
+            <div className="bg-white py-[60px] flex flex-col items-center justify-center">
+              <p className="font-medium text-[#858585] text-[14px] leading-[17px]">
+                승인 대기 중인 신청이 없습니다
+              </p>
+            </div>
+          ) : (
+            enrollments.map((enrollment) => (
+              <button
+                key={enrollment.enrollmentId}
+                onClick={() => {
+                  // 세부정보 페이지로 이동 (enrollmentId와 petId만 전달)
+                  const params = new URLSearchParams({
+                    enrollmentId: enrollment.enrollmentId.toString(),
+                    petId: enrollment.petId.toString(),
+                  });
+                  router.push(`/academy/accept/detail?${params.toString()}`);
+                }}
+                className="bg-white rounded-[7px] h-[68px] flex items-center px-[10px] gap-[6px] hover:bg-gray-50 transition-colors w-full text-left"
+              >
+                {/* 강아지 이미지 */}
+                <div className="w-[50px] h-[50px] rounded-full bg-[#e5e5e5] flex items-center justify-center flex-shrink-0 overflow-hidden">
+                  {enrollment.petImage ? (
+                    <img
+                      src={enrollment.petImage}
+                      alt={enrollment.petName}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <svg width="28" height="21" viewBox="0 0 28 21" fill="none">
+                      <path
+                        d="M14 10.5C16.7614 10.5 19 8.26142 19 5.5C19 2.73858 16.7614 0.5 14 0.5C11.2386 0.5 9 2.73858 9 5.5C9 8.26142 11.2386 10.5 14 10.5Z"
+                        fill="white"
+                      />
+                      <path
+                        d="M21 20.5V18.5C21 17.4391 20.5786 16.4217 19.8284 15.6716C19.0783 14.9214 18.0609 14.5 17 14.5H11C9.93913 14.5 8.92172 14.9214 8.17157 15.6716C7.42143 16.4217 7 17.4391 7 18.5V20.5"
+                        fill="white"
+                      />
+                    </svg>
+                  )}
+                </div>
+
+                {/* 강아지 정보 */}
+                <div className="flex-1">
+                  <div className="flex items-center gap-[4px] mb-[4px]">
+                    <p className="font-bold text-[#363e4a] text-[18px] leading-[normal]">
+                      {enrollment.petName}
+                    </p>
+                    {/* 성별 아이콘 */}
+                    <span className="text-[16px]">
+                      {enrollment.petGender === "MALE" ? "♂" : "♀"}
+                    </span>
+                  </div>
+                  <p className="font-medium text-[#6e7783] text-[12px] leading-[normal]">
+                    {enrollment.petBreed}
+                  </p>
+                </div>
+              </button>
+            ))
+          )}
+        </div>
       </div>
-    </>
+    </MainContainer>
   );
 }

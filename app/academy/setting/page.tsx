@@ -173,14 +173,7 @@ export default function AcademySettingPage() {
 
   // 회원탈퇴
   const handleWithdraw = () => {
-    if (
-      confirm(
-        "정말 탈퇴하시겠습니까?\n모든 데이터가 삭제되며 복구할 수 없습니다.",
-      )
-    ) {
-      // TODO: 회원탈퇴 API 구현
-      alert("회원탈퇴 기능은 준비 중입니다.");
-    }
+    router.push("/academy/leave");
   };
 
   if (isLoading || !academyData) {
@@ -504,7 +497,7 @@ export default function AcademySettingPage() {
       </div>
 
       {/* 하단 고정 버튼 */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white px-[20px] py-[25px] shadow-[0px_-2px_10px_0px_rgba(0,0,0,0.05)]">
+      <div className="fixed bottom-0 left-0 right-0 bg-white px-[20px] py-[25px]">
         <button
           onClick={handleSave}
           disabled={isSaving}

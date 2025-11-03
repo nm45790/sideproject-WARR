@@ -1,221 +1,177 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import MainContainer from "../../components/MainContainer";
-import Splash from "../../components/Splash";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
+import MainContainer from "../../components/MainContainer";
+import Icons from "../../components/Icons";
 import { useAuth } from "../../components/CombinedProvider";
+import { cookies } from "../../utils/cookies";
 
-export default function Academy() {
+export default function LeavePage() {
   const router = useRouter();
-  const isProduction = process.env.NODE_ENV === "production";
   const userInfo = useAuth();
+  const [isAgreed, setIsAgreed] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
 
-  const [splashFading, setSplashFading] = useState(isProduction ? false : true);
-  const [mainVisible, setMainVisible] = useState(isProduction ? false : true);
-
-  // 임시 데이터
-  const totalDogs = 6;
-  const currentDate = "2025.09.08 월요일";
-
-  useEffect(() => {
-    if (isProduction) {
-      const fadeOutTimer = setTimeout(() => {
-        setSplashFading(true);
-      }, 900);
-
-      const mainTimer = setTimeout(() => {
-        setMainVisible(true);
-      }, 1000);
-
-      return () => {
-        clearTimeout(fadeOutTimer);
-        clearTimeout(mainTimer);
-      };
+  // 회원탈퇴 처리
+  const handleLeave = async () => {
+    if (!isAgreed) {
+      return;
     }
-  }, [isProduction]);
+
+    if (
+      !confirm(
+        "정말 탈퇴하시겠습니까?\n모든 데이터가 삭제되며 복구할 수 없습니다.",
+      )
+    ) {
+      return;
+    }
+
+    try {
+      setIsProcessing(true);
+
+      // TODO: 실제 회원탈퇴 API 호출
+      console.log("회원탈퇴 처리:", {
+        userId: userInfo?.id,
+        name: userInfo?.name,
+        email: userInfo?.email,
+      });
+
+      // 임시: 2초 대기
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+
+      alert("회원탈퇴가 완료되었습니다.");
+
+      // 쿠키 삭제
+      cookies.remove("access_token");
+      cookies.remove("refresh_token");
+      cookies.remove("user_info");
+
+      // 메인 페이지로 이동
+      router.push("/");
+    } catch (error) {
+      console.error("회원탈퇴 실패:", error);
+      alert("회원탈퇴에 실패했습니다. 다시 시도해주세요.");
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  // 취소하기
+  const handleCancel = () => {
+    router.back();
+  };
 
   return (
-    <>
-      {/* 메인 콘텐츠 */}
-      <div
-        className={`transition-all duration-700 ease-out ${
-          mainVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
-        } w-full flex justify-center`}
-      >
-        <MainContainer bg="#f3f4f9">
-          <div className="relative w-full min-h-dvh">
-            {/* 인사말 및 아카데미 이름 */}
-            <div className="pt-[73px]">
-              <p className="font-bold text-[#363e4a] text-[20px] leading-[24px]">
-                안녕하세요!
+    <MainContainer bg="#ffffff" noPadding>
+      <div className="w-full min-h-dvh">
+        {/* 뒤로가기 버튼 */}
+        <div className="pt-[73px] px-[20px] pb-[27px]">
+          <button
+            onClick={() => router.back()}
+            className="hover:opacity-70 transition-opacity"
+          >
+            <Icons.Prev className="w-[26px] h-[22px]" />
+          </button>
+        </div>
+
+        {/* 제목 */}
+        <div className="px-[20px] mb-[179px]">
+          <h1 className="font-bold text-[#363e4a] text-[20px] leading-[normal]">
+            회원탈퇴
+          </h1>
+        </div>
+
+        {/* 메인 안내 문구 */}
+        <div className="px-[20px] mb-[79px]">
+          <p className="font-bold text-[#363e4a] text-[20px] leading-[normal] text-center">
+            회원 탈퇴 시
+            <br />
+            고객님의 모든 정보가 소멸되며
+            <br />
+            이전으로 <span className="text-[#e55647]">복구 불가능</span> 합니다.
+          </p>
+        </div>
+
+        {/* 세부 안내 사항 */}
+        <div className="px-[15px] mb-[19px]">
+          <ul className="space-y-[12px] list-disc ml-[19.5px]">
+            <li>
+              <p className="font-medium text-[#8e8e8e] text-[13px] leading-[normal]">
+                &bull; 탈퇴 이후 데이터 삭제로 인해 고객센터 대응에 어려움이
+                있을 수 있습니다.
               </p>
-              <div className="flex items-center gap-[5px] mt-[27px]">
-                <div className="bg-[#3f59ff] rounded-[7px] px-[8px] py-[5px]">
-                  <p className="font-bold text-white text-[20px] leading-[24px]">
-                    {userInfo?.name || "보호자"}
-                  </p>
-                </div>
-                <p className="font-bold text-[#363e4a] text-[20px] leading-[24px]">
-                  선생님! 👋
-                </p>
-              </div>
-            </div>
-
-            {/* 날짜 표시 */}
-            <div className="mt-[37px] bg-white rounded-[7px] inline-flex items-center gap-[9px] h-[40px] pl-[12px] pr-[12px]">
-              <div className="w-[9px] h-[10px]">
-                <svg
-                  width="9"
-                  height="10"
-                  viewBox="0 0 9 10"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M9 9V2C9 1.4485 8.5515 1 8 1H7V0H6V1H3V0H2V1H1C0.4485 1 0 1.4485 0 2V9C0 9.5515 0.4485 10 1 10H8C8.5515 10 9 9.5515 9 9ZM3 8H2V7H3V8ZM3 6H2V5H3V6ZM5 8H4V7H5V8ZM5 6H4V5H5V6ZM7 8H6V7H7V8ZM7 6H6V5H7V6ZM8 3.5H1V2.5H8V3.5Z"
-                    fill="#858585"
-                  />
-                </svg>
-              </div>
-              <p className="font-semibold text-[#858585] text-[14px] leading-[17px]">
-                {currentDate}
+            </li>
+            <li>
+              <p className="font-medium text-[#8e8e8e] text-[13px] leading-[normal]">
+                &bull; 탈퇴 시 60일간 동일 계정과 번호로 회원가입을 할 수
+                없습니다.
               </p>
-            </div>
+            </li>
+          </ul>
+        </div>
 
-            {/* 등원 현황 카드 */}
-            <div className="mt-[8px] bg-white rounded-[7px] shadow-[0px_1px_3px_0px_rgba(0,0,0,0.1)] h-[200px] relative">
-              {/* 상단 안내문구 */}
-              <div className="absolute top-[15px] left-[15px] flex items-center gap-[8px]">
-                <div className="w-[4px] h-[4px] rounded-full bg-[#858585]" />
-                <p className="font-medium text-[#858585] text-[12px] leading-[14px]">
-                  보호자가 등원 신청하면 바로 확인 가능해요
-                </p>
-              </div>
-
-              {/* 총 마리수 */}
-              <div className="absolute top-[61px] left-1/2 -translate-x-1/2">
-                <p className="font-bold text-[#363e4a] text-[55px] leading-[54px] text-center">
-                  {totalDogs}
-                </p>
-              </div>
-
-              {/* 마리 텍스트 */}
-              <div className="absolute top-[122px] left-1/2 -translate-x-1/2">
-                <p className="font-bold text-[#363e4a] text-[20px] leading-[normal]">
-                  마리
-                </p>
-              </div>
-
-              {/* 오늘 배지 */}
-              <div className="absolute top-[152px] left-1/2 -translate-x-1/2 bg-[#f9f0fb] rounded-[7px] px-[10px] py-[5px]">
-                <p className="font-bold text-[#a052ff] text-[12px] leading-[normal]">
-                  오늘
-                </p>
-              </div>
-
-              {/* 화살표 */}
-              <div className="absolute top-[91px] right-[20px]">
-                <svg width="6" height="13" viewBox="0 0 6 13" fill="none">
+        {/* 동의 체크박스 */}
+        <div className="px-[20px]">
+          <button
+            onClick={() => setIsAgreed(!isAgreed)}
+            className="flex items-center gap-[8px] w-full"
+          >
+            <div
+              className={`w-[20px] h-[20px] rounded-full border-2 flex items-center justify-center transition-colors flex-shrink-0 ${
+                isAgreed
+                  ? "bg-[#363e4a] border-[#363e4a]"
+                  : "bg-white border-[#d1d5db]"
+              }`}
+            >
+              {isAgreed && (
+                <svg width="12" height="9" viewBox="0 0 12 9" fill="none">
                   <path
-                    d="M1 1L5 6.5L1 12"
-                    stroke="#858585"
-                    strokeWidth="1.5"
+                    d="M1 4.5L4 7.5L11 1"
+                    stroke="white"
+                    strokeWidth="2"
                     strokeLinecap="round"
                     strokeLinejoin="round"
                   />
                 </svg>
-              </div>
+              )}
             </div>
+            <p className="font-bold text-[#8e8e8e] text-[16px] leading-[normal]">
+              안내 사항을 모두 확인했으면 동의합니다.
+            </p>
+          </button>
+        </div>
 
-            {/* 메뉴 카드 그리드 */}
-            <div className="mt-[11px] grid grid-cols-2 gap-x-[11px] gap-y-[11px]">
-              {/* 아이들 관리 */}
-              <button className="bg-white rounded-[7px] shadow-[0px_1px_3px_0px_rgba(0,0,0,0.1)] w-full h-[162px] flex flex-col items-center justify-center hover:bg-gray-50 transition-colors">
-                <div className="w-[52px] h-[52px] mb-[6px]">
-                  <div className="w-full h-full bg-gradient-to-br from-[#4fd1c5] to-[#38b2ac] rounded-full flex items-center justify-center">
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
-                      <path
-                        d="M16 21V19C16 17.9391 15.5786 16.9217 14.8284 16.1716C14.0783 15.4214 13.0609 15 12 15H5C3.93913 15 2.92172 15.4214 2.17157 16.1716C1.42143 16.9217 1 17.9391 1 19V21"
-                        stroke="white"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                      <circle
-                        cx="8.5"
-                        cy="7"
-                        r="4"
-                        stroke="white"
-                        strokeWidth="2"
-                      />
-                      <path
-                        d="M20 8V14M17 11H23"
-                        stroke="white"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                      />
-                    </svg>
-                  </div>
-                </div>
-                <p className="font-semibold text-[#363e4a] text-[14px] leading-[normal]">
-                  아이들 관리
-                </p>
-              </button>
-
-              {/* 유치원 설정 */}
-              <button className="bg-white rounded-[7px] shadow-[0px_1px_3px_0px_rgba(0,0,0,0.1)] w-full h-[162px] flex flex-col items-center justify-center hover:bg-gray-50 transition-colors">
-                <div className="w-[52px] h-[52px] mb-[6px]">
-                  <div className="w-full h-full bg-gradient-to-br from-[#f687b3] to-[#ed64a6] rounded-full flex items-center justify-center">
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
-                      <path
-                        d="M3 21H21M4 21V9L12 3L20 9V21M9 21V15H15V21"
-                        stroke="white"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                  </div>
-                </div>
-                <p className="font-semibold text-[#363e4a] text-[14px] leading-[normal]">
-                  유치원 설정
-                </p>
-              </button>
-
-              {/* 승인 관리 */}
-              <button className="bg-white rounded-[7px] shadow-[0px_1px_3px_0px_rgba(0,0,0,0.1)] w-full h-[162px] flex flex-col items-center justify-center hover:bg-gray-50 transition-colors">
-                <div className="w-[52px] h-[52px] mb-[6px]">
-                  <div className="w-full h-full bg-gradient-to-br from-[#fc8181] to-[#f56565] rounded-full flex items-center justify-center">
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
-                      <path
-                        d="M9 12L11 14L15 10M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z"
-                        stroke="white"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                  </div>
-                </div>
-                <p className="font-semibold text-[#363e4a] text-[14px] leading-[normal]">
-                  승인 관리
-                </p>
-              </button>
-            </div>
-          </div>
-        </MainContainer>
+        {/* 버튼 */}
+        <div className="px-[20px] mt-[47.5px] flex gap-[12px]">
+          <button
+            onClick={handleLeave}
+            disabled={!isAgreed || isProcessing}
+            className={`flex-1 h-[59px] rounded-[7px] flex items-center justify-center transition-all ${
+              isAgreed && !isProcessing
+                ? "bg-[#3F55FF] hover:bg-[#3646e6] cursor-pointer"
+                : "bg-[#e5e5e5] cursor-not-allowed"
+            }`}
+          >
+            <span
+              className={`font-semibold text-[16px] ${
+                isAgreed && !isProcessing ? "text-white" : "text-[#9ca3af]"
+              }`}
+            >
+              {isProcessing ? "처리 중..." : "탈퇴하기"}
+            </span>
+          </button>
+          <button
+            onClick={handleCancel}
+            disabled={isProcessing}
+            className="flex-1 h-[59px] bg-[#3E304A] rounded-[7px] flex items-center justify-center hover:bg-[#d5d5d5] transition-colors"
+          >
+            <span className="font-semibold text-[#FFF] text-[16px]">
+              취소하기
+            </span>
+          </button>
+        </div>
       </div>
-
-      {/* 스플래시 오버레이 */}
-      <div
-        className={`fixed inset-0 z-50 transition-opacity duration-500 ease-out ${
-          splashFading ? "opacity-0" : "opacity-100"
-        }`}
-        style={{ pointerEvents: splashFading ? "none" : "auto" }}
-      >
-        <Splash />
-      </div>
-    </>
+    </MainContainer>
   );
 }
