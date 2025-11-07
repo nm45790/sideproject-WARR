@@ -32,6 +32,15 @@ export interface SignupData {
   maxCapacity: number;
   scheduleList: ScheduleItem[];
   imageKey: string;
+  // Parent (pet) signup data
+  petName: string;
+  petBreed: string;
+  petBirthday: string;
+  petGender: string;
+  petAcademyId: number;
+  petStartDate: string;
+  petEndDate: string;
+  petImageKey: string;
   // Onboarding status
   isAcademyOnboardingCompleted: boolean;
 }
@@ -60,6 +69,16 @@ interface SignupStore {
   updateScheduleList: (scheduleList: ScheduleItem[]) => void;
   updateImageKey: (imageKey: string) => void;
   updateAcademyOnboardingCompleted: (completed: boolean) => void;
+
+  // Parent (pet) signup actions
+  updatePetName: (petName: string) => void;
+  updatePetBreed: (petBreed: string) => void;
+  updatePetBirthday: (petBirthday: string) => void;
+  updatePetGender: (petGender: string) => void;
+  updatePetAcademyId: (petAcademyId: number) => void;
+  updatePetStartDate: (petStartDate: string) => void;
+  updatePetEndDate: (petEndDate: string) => void;
+  updatePetImageKey: (petImageKey: string) => void;
 
   // 유틸리티
   isAllRequiredTermsAgreed: () => boolean;
@@ -90,6 +109,15 @@ const initialSignupData: SignupData = {
   maxCapacity: 0,
   scheduleList: [],
   imageKey: "",
+  // Parent (pet) signup data
+  petName: "",
+  petBreed: "",
+  petBirthday: "",
+  petGender: "",
+  petAcademyId: 0,
+  petStartDate: "",
+  petEndDate: "",
+  petImageKey: "",
   isAcademyOnboardingCompleted: false,
 };
 
@@ -239,6 +267,71 @@ export const useSignupStore = create<SignupStore>()((set, get) => ({
       signupData: {
         ...state.signupData,
         isAcademyOnboardingCompleted: completed,
+      },
+    })),
+
+  // Parent (pet) signup actions
+  updatePetName: (petName) =>
+    set((state) => ({
+      signupData: {
+        ...state.signupData,
+        petName,
+      },
+    })),
+
+  updatePetBreed: (petBreed) =>
+    set((state) => ({
+      signupData: {
+        ...state.signupData,
+        petBreed,
+      },
+    })),
+
+  updatePetBirthday: (petBirthday) =>
+    set((state) => ({
+      signupData: {
+        ...state.signupData,
+        petBirthday,
+      },
+    })),
+
+  updatePetGender: (petGender) =>
+    set((state) => ({
+      signupData: {
+        ...state.signupData,
+        petGender,
+      },
+    })),
+
+  updatePetAcademyId: (petAcademyId) =>
+    set((state) => ({
+      signupData: {
+        ...state.signupData,
+        petAcademyId,
+      },
+    })),
+
+  updatePetStartDate: (petStartDate) =>
+    set((state) => ({
+      signupData: {
+        ...state.signupData,
+        petStartDate,
+      },
+    })),
+
+  updatePetEndDate: (petEndDate) =>
+    set((state) => ({
+      signupData: {
+        ...state.signupData,
+        petEndDate,
+      },
+    })),
+
+  updatePetImageKey: (petImageKey) =>
+    set((state) => ({
+      signupData: {
+        ...state.signupData,
+        petImageKey,
       },
     })),
 
