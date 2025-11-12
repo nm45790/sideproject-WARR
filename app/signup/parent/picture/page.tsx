@@ -70,18 +70,6 @@ export default function ParentPicturePage() {
       updatePetImageKey(s3Key);
       console.log("Upload successful, s3Key:", s3Key);
 
-      // 2. 반려동물 등록 API 호출 (다음 단계에서 구현)
-      // const petData = {
-      //   name: signupData.petName,
-      //   breed: signupData.petBreed,
-      //   birthday: signupData.petBirthday,
-      //   gender: signupData.petGender,
-      //   academyId: signupData.petAcademyId,
-      //   startDate: signupData.petStartDate,
-      //   endDate: signupData.petEndDate,
-      //   imageKey: s3Key,
-      // };
-
       console.log("반려동물 등록 데이터:", {
         name: signupData.petName,
         breed: signupData.petBreed,
@@ -91,7 +79,7 @@ export default function ParentPicturePage() {
       });
 
       // 3. 성공 시 완료 페이지로 이동
-      router.push("/signup/parent/complete");
+      router.push("/signup/parent/academy");
     } catch (error) {
       console.error("등록 실패:", error);
       alert("등록에 실패했습니다. 다시 시도해주세요.");

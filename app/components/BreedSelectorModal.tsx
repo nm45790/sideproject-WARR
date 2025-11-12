@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Icons from "./Icons";
 
 interface BreedSelectorModalProps {
   isOpen: boolean;
@@ -17,11 +18,11 @@ export default function BreedSelectorModal({
 }: BreedSelectorModalProps) {
   const [searchTerm, setSearchTerm] = useState("");
 
-  // 임시 견종 데이터
+  // TODO: 견종 데이터 받아오기
   const breeds = ["흑구", "백구", "황구"];
 
   const filteredBreeds = breeds.filter((breed) =>
-    breed.toLowerCase().includes(searchTerm.toLowerCase())
+    breed.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   const handleBreedClick = (breed: string) => {
@@ -45,15 +46,7 @@ export default function BreedSelectorModal({
             onClick={onClose}
             className="p-[18px] w-[57px] h-[57px] flex items-center justify-center -ml-[18px]"
           >
-            <svg width="26" height="22" viewBox="0 0 26 22" fill="none">
-              <path
-                d="M15 7L10 11L15 15"
-                stroke="#363e4a"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
+            <Icons.Prev className="w-[26px] h-[22px]" />
           </button>
         </div>
 
@@ -70,7 +63,10 @@ export default function BreedSelectorModal({
       </div>
 
       {/* 견종 리스트 */}
-      <div className="px-5 overflow-y-auto" style={{ height: "calc(100vh - 280px)" }}>
+      <div
+        className="px-5 overflow-y-auto"
+        style={{ height: "calc(100vh - 280px)" }}
+      >
         <div className="bg-white rounded-[10px]">
           {filteredBreeds.length > 0 ? (
             filteredBreeds.map((breed) => (
@@ -81,7 +77,9 @@ export default function BreedSelectorModal({
               >
                 <p
                   className={`text-[16px] font-bold ${
-                    breed === selectedBreed ? "text-[#3f55ff]" : "text-[#8e8e8e]"
+                    breed === selectedBreed
+                      ? "text-[#3f55ff]"
+                      : "text-[#8e8e8e]"
                   }`}
                 >
                   {breed}
@@ -113,4 +111,3 @@ export default function BreedSelectorModal({
     </div>
   );
 }
-

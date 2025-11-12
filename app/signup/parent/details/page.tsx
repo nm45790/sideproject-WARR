@@ -13,14 +13,14 @@ export default function ParentDetailsPage() {
   const { signupData, updatePetBreed, updatePetBirthday } = useSignupStore();
 
   const [breed, setBreed] = useState(signupData.petBreed || "");
-  const [birthday, setBirthday] = useState(
+  const [birthday, setBirthday] = useState<Date | null>(
     signupData.petBirthday
       ? new Date(
           parseInt(signupData.petBirthday.substring(0, 4)),
           parseInt(signupData.petBirthday.substring(4, 6)) - 1,
           parseInt(signupData.petBirthday.substring(6, 8)),
         )
-      : new Date(),
+      : null,
   );
 
   const [showBreedModal, setShowBreedModal] = useState(false);
@@ -34,6 +34,8 @@ export default function ParentDetailsPage() {
       const month = parseInt(signupData.petBirthday.substring(4, 6)) - 1;
       const day = parseInt(signupData.petBirthday.substring(6, 8));
       setBirthday(new Date(year, month, day));
+    } else {
+      setBirthday(null);
     }
   }, [signupData]);
 
@@ -67,7 +69,7 @@ export default function ParentDetailsPage() {
       alert("견종을 선택해주세요.");
       return;
     }
-    if (!birthday) {
+    if (!birthday || !signupData.petBirthday) {
       alert("생일을 선택해주세요.");
       return;
     }
@@ -76,7 +78,7 @@ export default function ParentDetailsPage() {
     router.push("/signup/parent/picture");
   };
 
-  const isFormValid = breed?.trim() !== "" && birthday !== null;
+  const isFormValid = breed?.trim() !== "" && birthday !== null && signupData.petBirthday !== "";
 
   return (
     <MainContainer>
@@ -132,8 +134,8 @@ export default function ParentDetailsPage() {
             onClick={() => setShowBirthdayModal(true)}
             className="w-full h-[59px] border border-[#d2d2d2] rounded-[7px] px-5 text-[16px] font-medium outline-none transition-colors text-left"
           >
-            <span className="text-[#363e4a]">
-              {formatBirthdayDisplay(birthday)}
+            <span className={birthday ? "text-[#363e4a]" : "text-[#b4b4b4]"}>
+              {birthday ? formatBirthdayDisplay(birthday) : "생일을 선택해주세요"}
             </span>
           </button>
         </div>
@@ -164,7 +166,7 @@ export default function ParentDetailsPage() {
       <DatePickerModal
         isOpen={showBirthdayModal}
         onClose={() => setShowBirthdayModal(false)}
-        selectedDate={birthday}
+        selectedDate={birthday || new Date()}
         onDateSelect={handleBirthdaySelect}
       />
     </MainContainer>

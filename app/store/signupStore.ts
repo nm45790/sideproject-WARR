@@ -41,6 +41,7 @@ export interface SignupData {
   petStartDate: string;
   petEndDate: string;
   petImageKey: string;
+  regionCode: string;
   // Onboarding status
   isAcademyOnboardingCompleted: boolean;
   isParentOnboardingCompleted: boolean;
@@ -80,6 +81,7 @@ interface SignupStore {
   updatePetStartDate: (petStartDate: string) => void;
   updatePetEndDate: (petEndDate: string) => void;
   updatePetImageKey: (petImageKey: string) => void;
+  updateRegionCode: (regionCode: string) => void;
   updateParentOnboardingCompleted: (completed: boolean) => void;
 
   // 유틸리티
@@ -121,6 +123,7 @@ const initialSignupData: SignupData = {
   petStartDate: "",
   petEndDate: "",
   petImageKey: "",
+  regionCode: "ALL",
   isAcademyOnboardingCompleted: false,
   isParentOnboardingCompleted: false,
 };
@@ -336,6 +339,14 @@ export const useSignupStore = create<SignupStore>()((set, get) => ({
       signupData: {
         ...state.signupData,
         petImageKey,
+      },
+    })),
+
+  updateRegionCode: (regionCode) =>
+    set((state) => ({
+      signupData: {
+        ...state.signupData,
+        regionCode,
       },
     })),
 
