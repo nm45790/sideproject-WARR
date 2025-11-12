@@ -184,7 +184,7 @@ export default function AcademyOnboardingPage() {
             <div className="flex-1 flex items-center justify-center px-5">
               <div className="w-full max-w-[300px] h-[300px] flex items-center justify-center">
                 <div className="w-full h-full bg-gray-100 rounded-[20px] flex items-center justify-center">
-                  {/* 실제 이미지가 있으면 여기에 표시 */}
+                  {/* TODO: 실제 이미지가 있으면 여기에 표시 */}
                   <div className="text-[#858585] text-[16px] text-center">
                     {slide.image}
                   </div>

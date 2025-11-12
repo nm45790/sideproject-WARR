@@ -43,6 +43,7 @@ export interface SignupData {
   petImageKey: string;
   // Onboarding status
   isAcademyOnboardingCompleted: boolean;
+  isParentOnboardingCompleted: boolean;
 }
 
 interface SignupStore {
@@ -79,12 +80,14 @@ interface SignupStore {
   updatePetStartDate: (petStartDate: string) => void;
   updatePetEndDate: (petEndDate: string) => void;
   updatePetImageKey: (petImageKey: string) => void;
+  updateParentOnboardingCompleted: (completed: boolean) => void;
 
   // 유틸리티
   isAllRequiredTermsAgreed: () => boolean;
   isSignupDataComplete: () => boolean;
   isDetailsDataComplete: () => boolean;
   isAcademyOnboardingCompleted: () => boolean;
+  isParentOnboardingCompleted: () => boolean;
 }
 
 const initialSignupData: SignupData = {
@@ -119,6 +122,7 @@ const initialSignupData: SignupData = {
   petEndDate: "",
   petImageKey: "",
   isAcademyOnboardingCompleted: false,
+  isParentOnboardingCompleted: false,
 };
 
 export const useSignupStore = create<SignupStore>()((set, get) => ({
@@ -335,6 +339,14 @@ export const useSignupStore = create<SignupStore>()((set, get) => ({
       },
     })),
 
+  updateParentOnboardingCompleted: (completed) =>
+    set((state) => ({
+      signupData: {
+        ...state.signupData,
+        isParentOnboardingCompleted: completed,
+      },
+    })),
+
   // 필수 약관 모두 동의했는지 확인
   isAllRequiredTermsAgreed: () => {
     const { termsSelectOption } = get().signupData;
@@ -372,5 +384,10 @@ export const useSignupStore = create<SignupStore>()((set, get) => ({
   // Academy 온보딩 완료 여부 확인
   isAcademyOnboardingCompleted: () => {
     return get().signupData.isAcademyOnboardingCompleted;
+  },
+
+  // Parent 온보딩 완료 여부 확인
+  isParentOnboardingCompleted: () => {
+    return get().signupData.isParentOnboardingCompleted;
   },
 }));

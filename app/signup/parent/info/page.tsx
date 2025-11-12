@@ -47,8 +47,7 @@ export default function ParentInfoPage() {
       return;
     }
 
-    // 다음 페이지로 이동 (다음 단계 페이지로 수정 필요)
-    router.push("/signup/parent/breeds");
+    router.push("/signup/parent/details");
   };
 
   const isFormValid = petName?.trim() !== "" && petGender !== "";

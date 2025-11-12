@@ -70,28 +70,30 @@ export default function DatePickerModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-[rgba(0,0,0,0.5)]"
-      onClick={onClose}
+      className="fixed inset-0 z-50 bg-white"
+      onClick={(e) => e.stopPropagation()}
     >
-      <div
-        className="bg-white w-full max-w-[768px] rounded-t-[20px] pb-8 relative"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* 상단 헤더 배경 */}
-        <div className="absolute top-0 left-0 right-0 h-[93px] bg-gradient-to-b from-[#f8f8f8] to-white rounded-t-[20px]" />
-
-        {/* 닫기 버튼 */}
-        <div className="relative pt-6 px-6">
+      <div className="bg-white w-full h-full relative flex flex-col">
+        {/* 뒤로가기 버튼 */}
+        <div className="pt-[73px] px-5">
           <button
             onClick={onClose}
-            className="text-[#363e4a] text-[20px] leading-none font-light"
+            className="p-[18px] w-[57px] h-[57px] flex items-center justify-center -ml-[18px]"
           >
-            ✕
+            <svg width="26" height="22" viewBox="0 0 26 22" fill="none">
+              <path
+                d="M15 7L10 11L15 15"
+                stroke="#363e4a"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
           </button>
         </div>
 
         {/* 년/월 표시 및 이동 버튼 */}
-        <div className="relative flex items-center justify-center gap-[16px] mt-[54px] mb-[60px]">
+        <div className="flex items-center justify-center gap-[16px] mt-[40px] mb-[60px]">
           <button
             onClick={handlePrevMonth}
             className="bg-[#f6f6f6] rounded-[7px] w-[44px] h-[44px] flex items-center justify-center"
@@ -107,7 +109,7 @@ export default function DatePickerModal({
             </svg>
           </button>
 
-          <p className="font-bold text-[#363e4a] text-[25px] leading-normal min-w-[160px] text-center">
+          <p className="font-bold text-[#363e4a] text-[25px] leading-normal min-w-[180px] text-center">
             {year}년 {String(month + 1).padStart(2, "0")}월
           </p>
 
@@ -128,14 +130,14 @@ export default function DatePickerModal({
         </div>
 
         {/* 요일 헤더 */}
-        <div className="grid grid-cols-7 px-[22px] mb-[13px]">
+        <div className="grid grid-cols-7 px-[35px] mb-[13px]">
           {["일", "월", "화", "수", "목", "금", "토"].map((day, index) => (
             <div
               key={day}
               className="flex items-center justify-center h-[44px]"
             >
               <p
-                className={`font-medium text-[12px] leading-normal ${
+                className={`font-medium text-[14px] leading-normal ${
                   index === 0 ? "text-[#f56868]" : "text-[#6e7783]"
                 }`}
               >
@@ -146,31 +148,33 @@ export default function DatePickerModal({
         </div>
 
         {/* 날짜 그리드 */}
-        <div className="grid grid-cols-7 px-[22px]">
-          {calendarDays.slice(0, 35).map((date, index) => {
-            const isSelected = isSameDay(date, selectedDate);
-            const isInCurrentMonth = isCurrentMonth(date);
+        <div className="flex-1 overflow-y-auto px-[35px]">
+          <div className="grid grid-cols-7 gap-y-[8px]">
+            {calendarDays.map((date, index) => {
+              const isSelected = isSameDay(date, selectedDate);
+              const isInCurrentMonth = isCurrentMonth(date);
 
-            return (
-              <button
-                key={index}
-                onClick={() => handleDateClick(date)}
-                className={`
-                  h-[44px] w-[44px] rounded-[7px] flex items-center justify-center mx-auto
-                  ${isSelected ? "bg-[#3f59ff]" : "bg-white"}
-                  ${!isInCurrentMonth ? "opacity-30" : ""}
-                `}
-              >
-                <p
-                  className={`font-bold text-[16px] leading-normal ${
-                    isSelected ? "text-white" : "text-[#363e4a]"
-                  }`}
+              return (
+                <button
+                  key={index}
+                  onClick={() => handleDateClick(date)}
+                  className={`
+                    h-[50px] w-[50px] rounded-[7px] flex items-center justify-center mx-auto
+                    ${isSelected ? "bg-[#3f59ff]" : "bg-white"}
+                    ${!isInCurrentMonth ? "opacity-30" : ""}
+                  `}
                 >
-                  {date.getDate()}
-                </p>
-              </button>
-            );
-          })}
+                  <p
+                    className={`font-bold text-[18px] leading-normal ${
+                      isSelected ? "text-white" : "text-[#363e4a]"
+                    }`}
+                  >
+                    {date.getDate()}
+                  </p>
+                </button>
+              );
+            })}
+          </div>
         </div>
       </div>
     </div>

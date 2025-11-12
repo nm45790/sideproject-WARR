@@ -30,7 +30,7 @@ const onboardingSlides: OnboardingSlide[] = [
 
 export default function AcademyOnboardingPage() {
   const router = useRouter();
-  const { updateAcademyOnboardingCompleted } = useSignupStore();
+  const { updateParentOnboardingCompleted } = useSignupStore();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [startX, setStartX] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
@@ -50,8 +50,8 @@ export default function AcademyOnboardingPage() {
       setCurrentSlide(currentSlide + 1);
     } else {
       // 마지막 슬라이드에서 다음 버튼 클릭 시 온보딩 완료 플래그 설정하고 info 페이지로 이동
-      updateAcademyOnboardingCompleted(true);
-      router.push("/signup/academy/info");
+      updateParentOnboardingCompleted(true);
+      router.push("/signup/parent/info");
     }
   };
 
@@ -172,7 +172,7 @@ export default function AcademyOnboardingPage() {
             <div className="flex-1 flex items-center justify-center px-5">
               <div className="w-full max-w-[300px] h-[300px] flex items-center justify-center">
                 <div className="w-full h-full bg-gray-100 rounded-[20px] flex items-center justify-center">
-                  {/* 실제 이미지가 있으면 여기에 표시 */}
+                  {/* TODO: 실제 이미지가 있으면 여기에 표시 */}
                   <div className="text-[#858585] text-[16px] text-center">
                     {slide.image}
                   </div>
