@@ -111,13 +111,13 @@ export default function Academy() {
         } w-full flex justify-center`}
       >
         <MainContainer bg="#f3f4f9">
-          <div className="relative w-full min-h-dvh px-5">
+          <div className="relative w-full min-h-dvh">
             {/* 인사말 및 아카데미 이름 */}
             <div className="pt-[73px]">
               <p className="font-bold text-[#363e4a] text-[20px] leading-[24px]">
                 안녕하세요!
               </p>
-              <div className="flex items-center gap-[5px] mt-[27px]">
+              <div className="flex items-center gap-[4px] mt-[5px]">
                 <div className="bg-[#3f59ff] rounded-[7px] px-[8px] py-[5px]">
                   <p className="font-bold text-white text-[20px] leading-[24px]">
                     {userInfo?.name || "보호자"}
@@ -132,7 +132,7 @@ export default function Academy() {
             {/* 날짜 표시 */}
             <button
               onClick={() => setIsDatePickerOpen(true)}
-              className="mt-[37px] bg-white rounded-[7px] inline-flex items-center gap-[9px] h-[40px] pl-[12px] pr-[12px] hover:bg-gray-50 transition-colors"
+              className="mt-[30px] bg-white rounded-[7px] inline-flex items-center gap-[9px] h-[40px] pl-[12px] pr-[12px] hover:bg-gray-50 transition-colors"
             >
               <div className="w-[9px] h-[10px]">
                 <svg

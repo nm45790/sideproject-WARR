@@ -21,6 +21,9 @@ export default function ParentPage() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [userName, setUserName] = useState("");
+  const [isDragging, setIsDragging] = useState(false);
+  const [startX, setStartX] = useState(0);
+  const [scrollLeft, setScrollLeft] = useState(0);
 
   // 사용자 정보 및 반려동물 목록 조회
   useEffect(() => {
@@ -90,6 +93,41 @@ export default function ParentPage() {
       const index = Math.round(scrollLeft / cardWidth);
       setCurrentIndex(index);
     }
+  };
+
+  // 마우스 드래그 시작
+  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!scrollRef.current) return;
+    setIsDragging(true);
+    setStartX(e.pageX - scrollRef.current.offsetLeft);
+    setScrollLeft(scrollRef.current.scrollLeft);
+    scrollRef.current.style.cursor = "grabbing";
+    scrollRef.current.style.userSelect = "none";
+  };
+
+  // 마우스 드래그 종료
+  const handleMouseUp = () => {
+    if (!scrollRef.current) return;
+    setIsDragging(false);
+    scrollRef.current.style.cursor = "grab";
+    scrollRef.current.style.userSelect = "auto";
+  };
+
+  // 마우스 드래그 이동
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!isDragging || !scrollRef.current) return;
+    e.preventDefault();
+    const x = e.pageX - scrollRef.current.offsetLeft;
+    const walk = (x - startX) * 2; // 스크롤 속도 조절
+    scrollRef.current.scrollLeft = scrollLeft - walk;
+  };
+
+  // 마우스가 영역을 벗어났을 때
+  const handleMouseLeave = () => {
+    if (!scrollRef.current) return;
+    setIsDragging(false);
+    scrollRef.current.style.cursor = "grab";
+    scrollRef.current.style.userSelect = "auto";
   };
 
   // 설정 페이지로 이동
@@ -163,7 +201,11 @@ export default function ParentPage() {
       <div
         ref={scrollRef}
         onScroll={handleScroll}
-        className="flex gap-[30px] px-[30px] overflow-x-auto scrollbar-hide snap-x snap-mandatory scroll-smooth"
+        onMouseDown={handleMouseDown}
+        onMouseUp={handleMouseUp}
+        onMouseMove={handleMouseMove}
+        onMouseLeave={handleMouseLeave}
+        className="flex gap-[30px] px-[30px] overflow-x-auto scrollbar-hide snap-x snap-mandatory scroll-smooth cursor-grab"
         style={{
           scrollbarWidth: "none",
           msOverflowStyle: "none",
