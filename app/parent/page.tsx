@@ -94,7 +94,7 @@ export default function ParentPage() {
 
   // 설정 페이지로 이동
   const handleSettings = () => {
-    router.push("/parent/settings");
+    router.push("/parent/setting");
   };
 
   if (isLoading) {

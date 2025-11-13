@@ -173,7 +173,7 @@ export default function AcademySettingPage() {
 
   // 회원탈퇴
   const handleWithdraw = () => {
-    router.push("/academy/leave");
+    router.push("/leave");
   };
 
   if (isLoading || !academyData) {

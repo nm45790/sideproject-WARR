@@ -16,6 +16,7 @@ const queryClient = new QueryClient();
 // UserInfo 타입 정의
 interface UserInfo {
   id: number;
+  memberId: string;
   email: string;
   name: string;
   role: string;

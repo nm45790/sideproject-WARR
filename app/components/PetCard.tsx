@@ -52,8 +52,7 @@ export default function PetCard({ petDetail }: PetCardProps) {
 
   const handleEdit = (e: React.MouseEvent) => {
     e.stopPropagation(); // 카드 클릭 이벤트 전파 방지
-    // TODO: 수정 페이지로 이동
-    console.log("Edit pet:", petDetail.id);
+    router.push(`/parent/update?petId=${petDetail.id}`);
   };
 
   return (
