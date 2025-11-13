@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { PetDetail } from "../types/pet";
 import Icons from "./Icons";
 import { getImageUrl } from "../utils/image";
@@ -38,16 +39,28 @@ function calculateTimeWithPet(birthday: string): string {
 }
 
 export default function PetCard({ petDetail }: PetCardProps) {
+  const router = useRouter();
   const timeWithPet = calculateTimeWithPet(petDetail.petBirthday);
   const imageUrl = getImageUrl(petDetail.petImage);
 
-  const handleEdit = () => {
+  const handleCardClick = () => {
+    // 상태 페이지로 이동 (petId와 academyId 전달)
+    router.push(
+      `/parent/status?petId=${petDetail.id}&academyId=${petDetail.academyId}`,
+    );
+  };
+
+  const handleEdit = (e: React.MouseEvent) => {
+    e.stopPropagation(); // 카드 클릭 이벤트 전파 방지
     // TODO: 수정 페이지로 이동
     console.log("Edit pet:", petDetail.id);
   };
 
   return (
-    <div className="bg-white rounded-[7px] shadow-[0px_1px_3px_0px_rgba(0,0,0,0.1)] w-[315px] min-h-[458px] flex-shrink-0 snap-center relative pb-[20px]">
+    <div
+      onClick={handleCardClick}
+      className="bg-white rounded-[7px] shadow-[0px_1px_3px_0px_rgba(0,0,0,0.1)] w-[315px] min-h-[458px] flex-shrink-0 snap-center relative pb-[20px] cursor-pointer hover:shadow-lg transition-shadow"
+    >
       {/* 수정 버튼 */}
       <button
         onClick={handleEdit}

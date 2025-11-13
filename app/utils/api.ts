@@ -251,17 +251,35 @@ class ApiClient {
           statusCode: response.status,
         };
       } else {
+        const errorMessage =
+          data.message || data.error || "서버 오류가 발생했습니다.";
+
+        // 401(인증 오류)과 403(권한 오류)은 alert을 띄우지 않음 (자동 로그인 처리됨)
+        if (
+          response.status !== 401 &&
+          response.status !== 403 &&
+          typeof window !== "undefined"
+        ) {
+          alert(errorMessage);
+        }
+
         return {
           success: false,
-          error: data.message || data.error || "서버 오류가 발생했습니다.",
+          error: errorMessage,
           statusCode: response.status,
         };
       }
     } catch (error) {
       console.error("응답 파싱 중 오류가 발생했습니다:", error);
+      const errorMessage = "응답 파싱 중 오류가 발생했습니다.";
+
+      if (typeof window !== "undefined") {
+        alert(errorMessage);
+      }
+
       return {
         success: false,
-        error: "응답 파싱 중 오류가 발생했습니다.",
+        error: errorMessage,
         statusCode: response.status,
       };
     }

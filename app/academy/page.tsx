@@ -31,9 +31,11 @@ export default function Academy() {
       );
 
       if (response.success && response.data) {
-        const data = response.data as any;
+        const apiResponse = response.data as any;
+        // API 응답 구조: { code, data: { currentReservations, ... } }
+        const data = apiResponse.data;
         // currentReservations 값을 totalDogs로 설정
-        setTotalDogs(data.currentReservations || 0);
+        setTotalDogs(data?.currentReservations || 0);
       }
     } catch (error) {
       console.error("일정 조회 실패:", error);
