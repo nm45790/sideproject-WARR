@@ -1,0 +1,51 @@
+"use client";
+
+import { useRouter } from "next/navigation";
+import { PetDetail } from "../types/pet";
+
+interface RejectedCardProps {
+  petDetail: PetDetail;
+}
+
+export default function RejectedCard({ petDetail }: RejectedCardProps) {
+  const router = useRouter();
+
+  const handleFindAcademy = () => {
+    // 유치원 찾기 페이지로 이동 (온보딩 페이지로)
+    router.push("/signup/parent/onboarding");
+  };
+
+  return (
+    <div className="bg-white rounded-[7px] shadow-[0px_1px_3px_0px_rgba(0,0,0,0.1)] w-[315px] min-h-[458px] flex-shrink-0 snap-center flex flex-col items-center justify-center px-[20px] relative">
+      {/* 메인 메시지 */}
+      <div className="text-center mb-[25px]">
+        <h3 className="text-[25px] font-bold text-[#363e4a] leading-[30px]">
+          승인 거절
+        </h3>
+      </div>
+
+      {/* 서브 메시지 */}
+      <div className="text-center mb-[100px]">
+        <p className="text-[16px] font-medium text-[#858585]">
+          유치원을 잘못 선택한 것 같아요.
+        </p>
+        <p className="text-[16px] font-medium text-[#858585]">
+          다시 한 번 유치원을 선택해보세요!
+        </p>
+      </div>
+
+      {/* 유치원 찾기 버튼 */}
+      <div className="absolute bottom-[20px] left-[20px] right-[20px]">
+        <button
+          onClick={handleFindAcademy}
+          className="w-full h-[59px] bg-[#342c43] rounded-[7px] flex items-center justify-center hover:bg-opacity-90 transition-colors"
+        >
+          <span className="text-[16px] font-semibold text-white">
+            유치원 찾기
+          </span>
+        </button>
+      </div>
+    </div>
+  );
+}
+

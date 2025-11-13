@@ -28,12 +28,17 @@ export default function ParentDetailsPage() {
 
   // 접근권한 체크
   useEffect(() => {
+    // 강아지 추가 모드면 온보딩 체크 건너뜀
+    if (signupData.isAddingPet) {
+      return;
+    }
+    
     // 온보딩 완료 여부 체크
     if (!isParentOnboardingCompleted()) {
       alert("잘못된 접근입니다.");
       router.push("/");
     }
-  }, [router, isParentOnboardingCompleted]);
+  }, [router, isParentOnboardingCompleted, signupData.isAddingPet]);
 
   // localStorage에서 저장된 값으로 초기값 설정
   useEffect(() => {

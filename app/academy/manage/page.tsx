@@ -7,6 +7,7 @@ import Icons from "../../components/Icons";
 import { useAuth } from "../../components/CombinedProvider";
 import { api } from "../../utils/api";
 import { getChosung, isChosungSearch } from "../../utils/search";
+import { getImageUrl } from "../../utils/image";
 
 interface Enrollment {
   enrollmentId: number;
@@ -152,9 +153,8 @@ const AcademyManagePage = () => {
             </p>
           </div>
 
-          {/* 검색 인풋 */}
-          {/* TODO: 스티키 구현 */}
-          <div className="px-[20px] pb-[20px]">
+          {/* 검색 인풋 - Sticky */}
+          <div className="sticky top-0 z-10 bg-white px-[20px] pb-[20px]">
             <div className="relative">
               <input
                 type="text"
@@ -210,9 +210,9 @@ const AcademyManagePage = () => {
               >
                 {/* 강아지 이미지 */}
                 <div className="w-[50px] h-[50px] rounded-full bg-[#e5e5e5] flex items-center justify-center flex-shrink-0 overflow-hidden">
-                  {enrollment.petImage ? (
+                  {enrollment.petImage && getImageUrl(enrollment.petImage) ? (
                     <img
-                      src={enrollment.petImage}
+                      src={getImageUrl(enrollment.petImage)!}
                       alt={enrollment.petName}
                       className="w-full h-full object-cover"
                     />

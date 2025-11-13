@@ -45,6 +45,8 @@ export interface SignupData {
   // Onboarding status
   isAcademyOnboardingCompleted: boolean;
   isParentOnboardingCompleted: boolean;
+  // Pet adding mode
+  isAddingPet: boolean;
 }
 
 interface SignupStore {
@@ -90,6 +92,10 @@ interface SignupStore {
   isDetailsDataComplete: () => boolean;
   isAcademyOnboardingCompleted: () => boolean;
   isParentOnboardingCompleted: () => boolean;
+  
+  // Pet adding mode
+  setIsAddingPet: (isAdding: boolean) => void;
+  resetPetData: () => void;
 }
 
 const initialSignupData: SignupData = {
@@ -126,6 +132,7 @@ const initialSignupData: SignupData = {
   regionCode: "ALL",
   isAcademyOnboardingCompleted: false,
   isParentOnboardingCompleted: false,
+  isAddingPet: false,
 };
 
 export const useSignupStore = create<SignupStore>()((set, get) => ({
@@ -401,4 +408,30 @@ export const useSignupStore = create<SignupStore>()((set, get) => ({
   isParentOnboardingCompleted: () => {
     return get().signupData.isParentOnboardingCompleted;
   },
+
+  // 강아지 추가 모드 설정
+  setIsAddingPet: (isAdding) =>
+    set((state) => ({
+      signupData: {
+        ...state.signupData,
+        isAddingPet: isAdding,
+      },
+    })),
+
+  // 강아지 정보만 초기화 (강아지 추가 등록 시 사용)
+  resetPetData: () =>
+    set((state) => ({
+      signupData: {
+        ...state.signupData,
+        petName: "",
+        petBreed: "",
+        petBirthday: "",
+        petGender: "",
+        petAcademyId: 0,
+        petStartDate: "",
+        petEndDate: "",
+        petImageKey: "",
+        regionCode: "ALL",
+      },
+    })),
 }));

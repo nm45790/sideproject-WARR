@@ -37,6 +37,7 @@ export default function Home() {
       const { tokenManager } = await import("./utils/cookies");
       const hasAccessToken = !!tokenManager.getAccessToken();
       const hasRefreshToken = !!tokenManager.getRefreshToken();
+      console.log(userInfo?.role);
 
       console.log("🔍 [메인 페이지] 토큰 상태:", {
         hasAccessToken,

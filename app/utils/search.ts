@@ -28,22 +28,27 @@ const CHOSUNG_LIST = [
 /**
  * 한글 문자에서 초성 추출
  */
-function getChosung(char: string): string {
-  const code = char.charCodeAt(0);
+export function getChosung(text: string): string {
+  return text
+    .split("")
+    .map((char) => {
+      const code = char.charCodeAt(0);
 
-  // 한글 유니코드 범위: 0xAC00 ~ 0xD7A3
-  if (code >= 0xac00 && code <= 0xd7a3) {
-    const chosungIndex = Math.floor((code - 0xac00) / 588);
-    return CHOSUNG_LIST[chosungIndex];
-  }
+      // 한글 유니코드 범위: 0xAC00 ~ 0xD7A3
+      if (code >= 0xac00 && code <= 0xd7a3) {
+        const chosungIndex = Math.floor((code - 0xac00) / 588);
+        return CHOSUNG_LIST[chosungIndex];
+      }
 
-  // 초성 자체인 경우
-  if (CHOSUNG_LIST.includes(char)) {
-    return char;
-  }
+      // 초성 자체인 경우
+      if (CHOSUNG_LIST.includes(char)) {
+        return char;
+      }
 
-  // 한글이 아닌 경우 그대로 반환
-  return char;
+      // 한글이 아닌 경우 그대로 반환
+      return char;
+    })
+    .join("");
 }
 
 /**
@@ -52,7 +57,23 @@ function getChosung(char: string): string {
 function extractChosung(text: string): string {
   return text
     .split("")
-    .map((char) => getChosung(char))
+    .map((char) => {
+      const code = char.charCodeAt(0);
+
+      // 한글 유니코드 범위: 0xAC00 ~ 0xD7A3
+      if (code >= 0xac00 && code <= 0xd7a3) {
+        const chosungIndex = Math.floor((code - 0xac00) / 588);
+        return CHOSUNG_LIST[chosungIndex];
+      }
+
+      // 초성 자체인 경우
+      if (CHOSUNG_LIST.includes(char)) {
+        return char;
+      }
+
+      // 한글이 아닌 경우 그대로 반환
+      return char;
+    })
     .join("");
 }
 
@@ -62,6 +83,11 @@ function extractChosung(text: string): string {
 function isChosungOnly(text: string): boolean {
   return text.split("").every((char) => CHOSUNG_LIST.includes(char));
 }
+
+/**
+ * 검색어가 초성 검색인지 확인 (별칭)
+ */
+export const isChosungSearch = isChosungOnly;
 
 /**
  * 초성 검색 지원 매칭 함수

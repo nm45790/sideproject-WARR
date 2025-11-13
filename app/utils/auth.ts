@@ -12,6 +12,7 @@ export interface LoginResponse {
     accessToken: string;
     refreshToken: string;
     id: number;
+    memberId: string;
     email: string;
     name: string;
     role: string;

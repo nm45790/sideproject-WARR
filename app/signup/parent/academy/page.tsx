@@ -45,12 +45,17 @@ export default function ParentAcademyPage() {
 
   // 접근권한 체크
   useEffect(() => {
+    // 강아지 추가 모드면 온보딩 체크 건너뜀
+    if (signupData.isAddingPet) {
+      return;
+    }
+
     // 온보딩 완료 여부 체크
     if (!isParentOnboardingCompleted()) {
       alert("잘못된 접근입니다.");
       router.push("/");
     }
-  }, [router, isParentOnboardingCompleted]);
+  }, [router, isParentOnboardingCompleted, signupData.isAddingPet]);
 
   // 페이지 로드 시 유치원 목록 조회
   useEffect(() => {
@@ -99,7 +104,7 @@ export default function ParentAcademyPage() {
     setIsSubmitting(true);
 
     try {
-      // 반려동물 등록 API 호출
+      // 반려동물 등록 데이터
       const petData: any = {
         name: signupData.petName,
         breed: signupData.petBreed,
@@ -114,18 +119,34 @@ export default function ParentAcademyPage() {
 
       console.log("반려동물 등록 데이터:", petData);
 
-      const response = await api.post("/api/v1/pets", petData);
+      // API 엔드포인트 분기
+      const apiEndpoint = signupData.isAddingPet
+        ? "/api/v1/pets" // 강아지 추가
+        : "/api/v1/members/signup/parent"; // 새 회원 등록
+
+      console.log(
+        `API 호출: ${apiEndpoint} (모드: ${signupData.isAddingPet ? "강아지 추가" : "새 회원 등록"})`,
+      );
+
+      const response = await api.post(apiEndpoint, petData);
 
       if (response.success) {
-        console.log("반려동물 등록 성공:", response.data);
-        // 성공 시 complete 페이지로 이동
-        router.push("/signup/parent/complete");
+        console.log("등록 성공:", response.data);
+
+        // 성공 시 이동할 페이지 결정
+        if (signupData.isAddingPet) {
+          // 강아지 추가 모드: 보호자 메인 페이지로 이동
+          router.push("/parent");
+        } else {
+          // 새 회원 등록 모드: complete 페이지로 이동
+          router.push("/signup/parent/complete");
+        }
       } else {
-        throw new Error(response.error || "반려동물 등록에 실패했습니다.");
+        throw new Error(response.error || "등록에 실패했습니다.");
       }
     } catch (error) {
-      console.error("반려동물 등록 실패:", error);
-      alert("반려동물 등록에 실패했습니다. 다시 시도해주세요.");
+      console.error("등록 실패:", error);
+      alert("등록에 실패했습니다. 다시 시도해주세요.");
     } finally {
       setIsSubmitting(false);
     }

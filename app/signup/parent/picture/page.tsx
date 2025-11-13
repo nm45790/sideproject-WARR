@@ -17,14 +17,19 @@ export default function ParentPicturePage() {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
 
-  // 접근권한 체크 (선택사항 - parent는 로그인 없이 진행 가능할 수도 있음)
+  // 접근권한 체크
   useEffect(() => {
+    // 강아지 추가 모드면 온보딩 체크 건너뜀
+    if (signupData.isAddingPet) {
+      return;
+    }
+
     // 온보딩 완료 여부 체크
     if (!isParentOnboardingCompleted()) {
       alert("잘못된 접근입니다.");
       router.push("/");
     }
-  }, [router, isParentOnboardingCompleted]);
+  }, [router, isParentOnboardingCompleted, signupData.isAddingPet]);
 
   const handleGoBack = () => {
     router.back();
