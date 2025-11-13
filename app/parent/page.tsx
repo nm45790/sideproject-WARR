@@ -187,7 +187,7 @@ export default function ParentPage() {
           // enrollmentStatus에 따라 다른 카드 렌더링
           if (pet.enrollmentStatus === "WAITING") {
             return <WaitingCard key={pet.id} petDetail={petDetail} />;
-          } else if (pet.enrollmentStatus === "REJECTED") {
+          } else if (pet.enrollmentStatus === "CANCELLED") {
             return <RejectedCard key={pet.id} petDetail={petDetail} />;
           } else if (pet.enrollmentStatus === "APPROVED") {
             return <PetCard key={pet.id} petDetail={petDetail} />;

@@ -1,5 +1,5 @@
 // 반려동물 등록 상태
-export type EnrollmentStatus = "WAITING" | "APPROVED" | "REJECTED";
+export type EnrollmentStatus = "WAITING" | "APPROVED" | "CANCELLED";
 
 // 반려동물 성별
 export type PetGender = "MALE" | "FEMALE";
@@ -46,4 +46,3 @@ export interface PetDetailResponse {
   code: number;
   data: PetDetail;
 }
-

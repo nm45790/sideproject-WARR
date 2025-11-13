@@ -31,6 +31,7 @@ export default function AcceptDetailPage() {
   const searchParams = useSearchParams();
   const userInfo = useAuth();
   const [isApproving, setIsApproving] = useState(false);
+  const [isRejecting, setIsRejecting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [petDetail, setPetDetail] = useState<PetDetail | null>(null);
 
@@ -100,8 +101,31 @@ export default function AcceptDetailPage() {
   };
 
   // 승인거절
-  const handleReject = () => {
-    router.back();
+  const handleReject = async () => {
+    if (!enrollmentId || !petDetail) return;
+
+    if (!confirm(`${petDetail.petName}의 등록 신청을 거절하시겠습니까?`)) {
+      return;
+    }
+
+    try {
+      setIsRejecting(true);
+      const response = await api.post(
+        `/api/v1/enrollments/${enrollmentId}/reject`,
+      );
+
+      if (response.success) {
+        alert("승인 거절이 완료되었습니다.");
+        router.push("/academy/accept");
+      } else {
+        throw new Error("승인 거절에 실패했습니다.");
+      }
+    } catch (error) {
+      console.error("승인 거절 실패:", error);
+      alert("승인 거절에 실패했습니다. 다시 시도해주세요.");
+    } finally {
+      setIsRejecting(false);
+    }
   };
 
   // 로딩 중일 때
@@ -251,9 +275,9 @@ export default function AcceptDetailPage() {
       <div className="fixed bottom-0 left-0 right-0 bg-white px-[20px] py-[25px] flex gap-[12px]">
         <button
           onClick={handleApprove}
-          disabled={isApproving}
+          disabled={isApproving || isRejecting}
           className={`flex-1 h-[59px] rounded-[7px] flex items-center justify-center transition-colors ${
-            isApproving
+            isApproving || isRejecting
               ? "bg-[#f0f0f0] cursor-not-allowed"
               : "bg-[#3f55ff] hover:bg-[#3646e6] cursor-pointer"
           }`}
@@ -264,11 +288,15 @@ export default function AcceptDetailPage() {
         </button>
         <button
           onClick={handleReject}
-          disabled={isApproving}
-          className="flex-1 h-[59px] bg-[#e5e5e5] rounded-[7px] flex items-center justify-center hover:bg-[#d5d5d5] transition-colors"
+          disabled={isApproving || isRejecting}
+          className={`flex-1 h-[59px] rounded-[7px] flex items-center justify-center transition-colors ${
+            isApproving || isRejecting
+              ? "bg-[#f0f0f0] cursor-not-allowed"
+              : "bg-[#e5e5e5] hover:bg-[#d5d5d5] cursor-pointer"
+          }`}
         >
           <span className="font-semibold text-[#6e7783] text-[16px]">
-            승인거절
+            {isRejecting ? "처리 중..." : "승인거절"}
           </span>
         </button>
       </div>

@@ -96,16 +96,17 @@ export default function LoginPage() {
     };
 
     const redirectByRole = (role: string) => {
+      // 페이지를 완전히 새로고침하여 쿠키 정보가 제대로 로드되도록 함
       if (role === "USER") {
-        router.replace("/parent");
+        window.location.href = "/parent";
       } else if (role === "ACADEMY") {
-        router.replace("/academy");
+        window.location.href = "/academy";
       } else if (role === "TEMP") {
-        router.replace("/signup/role");
+        window.location.href = "/signup/role";
       } else if (role === "TEMP_ACADEMY") {
-        router.replace("/signup/academy/onboarding");
+        window.location.href = "/signup/academy/onboarding";
       } else if (role === "TEMP_USER") {
-        router.replace("/signup/parent/onboarding");
+        window.location.href = "/signup/parent/onboarding";
       }
     };
 
@@ -132,16 +133,17 @@ export default function LoginPage() {
         const userInfo = authService.getCurrentUserInfo();
         console.log("로그인된 사용자 정보:", userInfo);
 
+        // 페이지를 완전히 새로고침하여 쿠키 정보가 제대로 로드되도록 함
         if (result.data?.data.role === "USER") {
-          router.push("/parent");
+          window.location.href = "/parent";
         } else if (result.data?.data.role === "ACADEMY") {
-          router.push("/academy");
+          window.location.href = "/academy";
         } else if (result.data?.data.role === "TEMP") {
-          router.push("/signup/role");
+          window.location.href = "/signup/role";
         } else if (result.data?.data.role === "TEMP_ACADEMY") {
-          router.push("/signup/academy/onboarding");
+          window.location.href = "/signup/academy/onboarding";
         } else if (result.data?.data.role === "TEMP_USER") {
-          router.push("/signup/parent/onboarding");
+          window.location.href = "/signup/parent/onboarding";
         }
       } else {
         setError(result.error || "로그인에 실패했습니다.");

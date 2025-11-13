@@ -12,7 +12,7 @@ export default function RejectedCard({ petDetail }: RejectedCardProps) {
 
   const handleFindAcademy = () => {
     // 유치원 찾기 페이지로 이동 (온보딩 페이지로)
-    router.push("/signup/parent/onboarding");
+    router.push("/signup/parent/info");
   };
 
   return (
@@ -48,4 +48,3 @@ export default function RejectedCard({ petDetail }: RejectedCardProps) {
     </div>
   );
 }
-
