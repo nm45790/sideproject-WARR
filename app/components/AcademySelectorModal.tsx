@@ -1,25 +1,32 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Icons from "./Icons";
+import { filterBySearch } from "../utils/search";
 
 interface Academy {
   id: number;
   name: string;
   address: string;
+  addressDetail: string;
+  sggCode: string;
+  phone: string;
+  description: string | null;
+  status: string;
 }
 
 interface AcademySelectorModalProps {
   isOpen: boolean;
   onClose: () => void;
   selectedAcademyId: number;
-  onAcademySelect: (academyId: number) => void;
+  onAcademySelect: (academyId: number, academyName?: string) => void;
   regionCode: string;
   regionName: string;
   onRegionClick: () => void;
+  academies: Academy[];
+  isLoading: boolean;
 }
 
-// TODO: 유치원 데이터 받아오기
 export default function AcademySelectorModal({
   isOpen,
   onClose,
@@ -28,29 +35,30 @@ export default function AcademySelectorModal({
   regionCode,
   regionName,
   onRegionClick,
+  academies,
+  isLoading,
 }: AcademySelectorModalProps) {
   const [searchTerm, setSearchTerm] = useState("");
 
-  // 임시 유치원 데이터
-  const academies: Academy[] = [
-    { id: 1, name: "멍학당", address: "성남시 중원구 금광로 39 602" },
-    {
-      id: 2,
-      name: "멍스멍스 유치원",
-      address: "경상남도 김해시 김밥로 단무지77",
-    },
-    { id: 3, name: "멍멍이 스쿨", address: "경상남도 통영시 굴길 1234" },
-  ];
-
-  const filteredAcademies = academies.filter((academy) =>
-    academy.name.toLowerCase().includes(searchTerm.toLowerCase()),
+  // 클라이언트 사이드 필터링 (초성 검색 지원)
+  const filteredAcademies = filterBySearch(
+    academies,
+    searchTerm,
+    (academy) => academy.name,
   );
 
-  const handleAcademyClick = (academyId: number) => {
-    onAcademySelect(academyId);
-    onClose();
+  const handleAcademyClick = (academy: Academy) => {
+    onAcademySelect(academy.id, academy.name);
     setSearchTerm("");
+    onClose();
   };
+
+  // 모달 닫힐 때 검색어 초기화
+  useEffect(() => {
+    if (!isOpen) {
+      setSearchTerm("");
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -129,11 +137,15 @@ export default function AcademySelectorModal({
         style={{ height: "calc(100vh - 330px)" }}
       >
         <div className="bg-white">
-          {filteredAcademies.length > 0 ? (
+          {isLoading ? (
+            <div className="py-10 text-center">
+              <p className="text-[16px] text-[#8e8e8e]">검색 중...</p>
+            </div>
+          ) : filteredAcademies.length > 0 ? (
             filteredAcademies.map((academy) => (
               <button
                 key={academy.id}
-                onClick={() => handleAcademyClick(academy.id)}
+                onClick={() => handleAcademyClick(academy)}
                 className="w-full flex flex-col gap-[7px] px-5 py-3 hover:bg-gray-50 transition-colors text-left"
               >
                 <p
@@ -146,7 +158,7 @@ export default function AcademySelectorModal({
                   {academy.name}
                 </p>
                 <p className="text-[12px] font-medium text-[#727272]">
-                  {academy.address}
+                  {academy.address} {academy.addressDetail}
                 </p>
               </button>
             ))

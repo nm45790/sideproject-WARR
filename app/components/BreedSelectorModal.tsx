@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import Icons from "./Icons";
+import { filterBySearch } from "../utils/search";
+import { breeds } from "../constants/breeds";
 
 interface BreedSelectorModalProps {
   isOpen: boolean;
@@ -18,12 +20,8 @@ export default function BreedSelectorModal({
 }: BreedSelectorModalProps) {
   const [searchTerm, setSearchTerm] = useState("");
 
-  // TODO: 견종 데이터 받아오기
-  const breeds = ["흑구", "백구", "황구"];
-
-  const filteredBreeds = breeds.filter((breed) =>
-    breed.toLowerCase().includes(searchTerm.toLowerCase()),
-  );
+  // 초성 검색 지원
+  const filteredBreeds = filterBySearch(breeds, searchTerm, (breed) => breed);
 
   const handleBreedClick = (breed: string) => {
     onBreedSelect(breed);

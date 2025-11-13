@@ -10,7 +10,7 @@ import DatePickerModal from "../../../components/DatePickerModal";
 
 export default function ParentDetailsPage() {
   const router = useRouter();
-  const { signupData, updatePetBreed, updatePetBirthday } = useSignupStore();
+  const { signupData, updatePetBreed, updatePetBirthday, isParentOnboardingCompleted } = useSignupStore();
 
   const [breed, setBreed] = useState(signupData.petBreed || "");
   const [birthday, setBirthday] = useState<Date | null>(
@@ -25,6 +25,15 @@ export default function ParentDetailsPage() {
 
   const [showBreedModal, setShowBreedModal] = useState(false);
   const [showBirthdayModal, setShowBirthdayModal] = useState(false);
+
+  // 접근권한 체크
+  useEffect(() => {
+    // 온보딩 완료 여부 체크
+    if (!isParentOnboardingCompleted()) {
+      alert("잘못된 접근입니다.");
+      router.push("/");
+    }
+  }, [router, isParentOnboardingCompleted]);
 
   // localStorage에서 저장된 값으로 초기값 설정
   useEffect(() => {

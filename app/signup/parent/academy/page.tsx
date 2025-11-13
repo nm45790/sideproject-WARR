@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import MainContainer from "../../../components/MainContainer";
 import Icons from "../../../components/Icons";
@@ -9,33 +9,80 @@ import AcademySelectorModal from "../../../components/AcademySelectorModal";
 import RegionSelectorModal from "../../../components/RegionSelectorModal";
 import { api } from "../../../utils/api";
 
+interface Academy {
+  id: number;
+  name: string;
+  address: string;
+  addressDetail: string;
+  sggCode: string;
+  phone: string;
+  description: string | null;
+  status: string;
+}
+
 export default function ParentAcademyPage() {
   const router = useRouter();
-  const { signupData, updatePetAcademyId, updateRegionCode } = useSignupStore();
+  const {
+    signupData,
+    updatePetAcademyId,
+    updateRegionCode,
+    isParentOnboardingCompleted,
+  } = useSignupStore();
 
   const [isAcademyModalOpen, setIsAcademyModalOpen] = useState(false);
   const [isRegionModalOpen, setIsRegionModalOpen] = useState(false);
   const [regionName, setRegionName] = useState("전국");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedAcademyName, setSelectedAcademyName] = useState("");
+  const [academies, setAcademies] = useState<Academy[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
-  // 임시 유치원 데이터 (모달에서도 사용하므로 여기서 정의)
-  const academies = [
-    { id: 1, name: "멍학당", address: "성남시 중원구 금광로 39 602" },
-    {
-      id: 2,
-      name: "멍스멍스 유치원",
-      address: "경상남도 김해시 김밥로 단무지77",
-    },
-    { id: 3, name: "멍멍이 스쿨", address: "경상남도 통영시 굴길 1234" },
-  ];
+  // 선택된 유치원 이름 표시용
+  const selectedAcademy =
+    signupData.petAcademyId !== 0 && selectedAcademyName
+      ? { id: signupData.petAcademyId, name: selectedAcademyName }
+      : null;
 
-  // 선택된 유치원 정보
-  const selectedAcademy = academies.find(
-    (academy) => academy.id === signupData.petAcademyId,
-  );
+  // 접근권한 체크
+  useEffect(() => {
+    // 온보딩 완료 여부 체크
+    if (!isParentOnboardingCompleted()) {
+      alert("잘못된 접근입니다.");
+      router.push("/");
+    }
+  }, [router, isParentOnboardingCompleted]);
 
-  const handleAcademySelect = (academyId: number) => {
+  // 페이지 로드 시 유치원 목록 조회
+  useEffect(() => {
+    const fetchAcademies = async () => {
+      setIsLoading(true);
+      try {
+        const response = await api.get<{
+          code: number;
+          data: Academy[];
+        }>(`/api/v1/academies/search`);
+
+        if (response.success && response.data) {
+          setAcademies(response.data.data || []);
+        } else {
+          setAcademies([]);
+        }
+      } catch (error) {
+        console.error("유치원 목록 조회 실패:", error);
+        setAcademies([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchAcademies();
+  }, []);
+
+  const handleAcademySelect = (academyId: number, academyName?: string) => {
     updatePetAcademyId(academyId);
+    if (academyName) {
+      setSelectedAcademyName(academyName);
+    }
   };
 
   const handleRegionSelect = (regionCode: string, name: string) => {
@@ -60,15 +107,10 @@ export default function ParentAcademyPage() {
         gender: signupData.petGender,
         academyId: signupData.petAcademyId,
         imageKey: signupData.petImageKey,
+        // 추후 필요한 값 현재는 임시값
+        startDate: new Date().toISOString().slice(0, 10).replace(/-/g, ""),
+        endDate: new Date().toISOString().slice(0, 10).replace(/-/g, ""),
       };
-
-      // startDate와 endDate는 선택사항으로 처리 (값이 있을 때만 포함)
-      if (signupData.petStartDate) {
-        petData.startDate = signupData.petStartDate;
-      }
-      if (signupData.petEndDate) {
-        petData.endDate = signupData.petEndDate;
-      }
 
       console.log("반려동물 등록 데이터:", petData);
 
@@ -173,6 +215,8 @@ export default function ParentAcademyPage() {
         regionCode={signupData.regionCode}
         regionName={regionName}
         onRegionClick={() => setIsRegionModalOpen(true)}
+        academies={academies}
+        isLoading={isLoading}
       />
 
       {/* 지역 선택 모달 */}

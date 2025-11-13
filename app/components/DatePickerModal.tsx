@@ -28,9 +28,9 @@ export default function DatePickerModal({
   const year = currentMonth.getFullYear();
   const month = currentMonth.getMonth();
 
-  // 년도 선택 모드용 년도 리스트 생성 (현재 년도 기준 ±50년)
+  // 년도 선택 모드용 년도 리스트 생성 (올해부터 과거 30년까지)
   const currentYear = new Date().getFullYear();
-  const yearList = Array.from({ length: 101 }, (_, i) => currentYear - 50 + i);
+  const yearList = Array.from({ length: 31 }, (_, i) => currentYear - i);
 
   // 해당 월의 첫날과 마지막날
   const firstDay = new Date(year, month, 1);
